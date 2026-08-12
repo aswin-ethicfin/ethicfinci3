@@ -1,0 +1,14 @@
+{
+    "name": "user/addon",
+    "authors": [
+        {
+            "name": "KSS96-CodeCraft",
+            "email": "sreedevisubrahmaniank@gmail.com"
+        }
+    ],
+    "require": {
+        "mpdf/mpdf": "^8.3",
+        "tecnickcom/tcpdf": "^6.11",
+        "phpmailer/phpmailer": "^7.1"
+    }
+}
