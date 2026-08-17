@@ -1,0 +1,336 @@
+<div class="container-fluid py-4">
+
+    <div class="row">
+
+        <div class="col-12">
+
+            <div class="card my-4">
+
+                <!-- Header -->
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+
+                        <h6 class="text-white text-capitalize ps-3 mb-0">
+
+                          Payment Approval Out
+                        </h6>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+                <div class="card-body px-4 pb-2">
+
+                    <form method="get" class="mb-4 row g-3 align-items-end">
+
+                        <!-- Start Date -->
+                        <div class="col-md-2">
+
+                            <label class="form-label fw-bold">
+                                Start Date
+                            </label>
+
+                            <input type="date"
+                                name="start_date"
+                                class="form-control border border-dark rounded">
+
+                        </div>
+
+
+                        <!-- End Date -->
+                        <div class="col-md-2">
+
+                            <label class="form-label fw-bold">
+                                End Date
+                            </label>
+
+                            <input type="date"
+                                name="end_date"
+                                class="form-control border border-dark rounded">
+
+                        </div>
+
+
+                        <!-- Document Type -->
+                        <div class="col-md-2">
+
+                            <label class="form-label fw-bold">
+                                Document Type
+                            </label>
+
+                            <select name="type"
+                                class="form-select border border-dark rounded">
+
+                                <option value="">
+                                    All Documents
+                                </option>
+
+                                <option value="0">
+                                    Purchase Order
+                                </option>
+
+                                <option value="1">
+                                    Sales Order
+                                </option>
+
+                                <option value="2">
+                                    Payment
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Status -->
+                        <div class="col-md-2">
+
+                            <label class="form-label fw-bold">
+                                Status
+                            </label>
+
+                            <select name="approval_status"
+                                class="form-select border border-dark rounded">
+
+                                <option value="">
+                                    All Status
+                                </option>
+
+                                <option value="waiting">
+                                    Waiting
+                                </option>
+
+                                <option value="pending">
+                                    Pending
+                                </option>
+
+                                <option value="approved">
+                                    Approved
+                                </option>
+
+                                <option value="rejected">
+                                    Rejected
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Search -->
+                        <div class="col-md-3">
+
+                            <label class="form-label fw-bold">
+                                Search
+                            </label>
+
+                            <input type="text"
+                                name="search"
+                                class="form-control border border-dark rounded"
+                                placeholder="Document No / Vendor">
+
+                        </div>
+
+
+                        <!-- Buttons -->
+                        <div class="col-md-1 d-flex justify-content-end">
+
+                            <button type="submit"
+                                class="btn btn-primary me-2">
+
+                                <i class="fa fa-search"></i>
+
+                            </button>
+
+                            <a href="<?= base_url('Approval/approval_out?type=' . (int)$type) ?>"
+                                class="btn btn-secondary">
+
+                                <i class="fa fa-sync-alt"></i>
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+
+                    <!-- Table -->
+                    <div class="table-responsive">
+
+                        <table class="table align-items-center mb-0">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+
+
+                                    <th>
+                                        Doc. No.
+                                    </th>
+
+                                    <th>
+                                        Vendor
+                                    </th>
+
+                                    <th class="text-end">
+                                        Amount
+                                    </th>
+
+                                    <th>
+                                        To
+                                    </th>
+
+                                    <th class="text-center">
+                                        Status
+                                    </th>
+
+                                    <th class="text-end">
+                                        Operations
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+ 
+                            <tbody>
+
+                                <?php if (!empty($payments)): ?>
+
+                                    <?php foreach ($payments as $row): ?>
+
+                                        <tr>
+
+                                            <!-- Date -->
+                                            <td>
+        <?= !empty($row['date'])
+            ? date('d-M-Y', strtotime($row['date']))
+            : '-' ?>
+    </td>
+
+
+
+                                            <!-- Document Number -->
+                                            <td>
+                                                <strong>
+                                                    <?= html_escape($row['reference']) ?>
+                                                </strong>
+                                            </td>
+
+                                            <!-- Vendor -->
+                                            <td>
+                                                  <?= html_escape($row['profile_name'] ?? '-') ?>
+                                            </td>
+
+                                            <!-- Amount -->
+                                            <td class="text-end">
+                                                <?= number_format((float)$row['amount'], 2) ?> SAR
+                                            </td>
+
+                                            <!-- To -->
+                                            <td>
+
+                                                <strong>
+                                                    <?= html_escape($row['transfer_to_name'] ?? '-') ?>
+                                                </strong>
+
+                                                <?php if (!empty($row['transfer_to_designation'])): ?>
+                                                    <br>
+
+                                                    <small class="text-secondary">
+                                                        <?= html_escape($row['transfer_to_designation']) ?>
+                                                    </small>
+                                                <?php endif; ?>
+
+                                            </td>
+
+                                            <!-- Status -->
+                                            <td class="text-center">
+
+                                                <?php
+
+                                                switch ((int)$row['approval_status']) {
+
+                                                    case 0:
+                                                        echo '<span class="badge bg-gradient-warning">
+                                Pending
+                              </span>';
+                                                        break;
+
+                                                    case 1:
+                                                        echo '<span class="badge bg-gradient-success">
+                                Approved
+                              </span>';
+                                                        break;
+
+                                                    case 2:
+                                                        echo '<span class="badge bg-gradient-danger">
+                                Rejected
+                              </span>';
+                                                        break;
+
+                                                    case 3:
+                                                        echo '<span class="badge bg-gradient-secondary">
+                                Waiting
+                              </span>';
+                                                        break;
+
+                                                    default:
+                                                        echo '<span class="badge bg-gradient-dark">
+                                Unknown
+                              </span>';
+                                                        break;
+                                                }
+
+                                                ?>
+
+                                            </td>
+
+                                            <!-- Operations -->
+                                            <td class="text-end">
+
+                                                <div class="d-flex justify-content-end gap-1">
+
+                                                    <!-- Edit -->
+                                                    
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                <?php else: ?>
+
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            No payment sent for approval.
+                                        </td>
+                                    </tr>
+
+                                <?php endif; ?>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

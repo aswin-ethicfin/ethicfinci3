@@ -1,9 +1,3 @@
-<?php
-$orders = array_merge(
-    $purchase_orders ?? [],
-    $sales_orders ?? []
-);
-?>
 <div class="container-fluid py-4">
 
     <div class="row">
@@ -12,26 +6,13 @@ $orders = array_merge(
 
             <div class="card my-4">
 
-                <!-- Header -->
+                <!-- HEADER -->
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
 
                     <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
 
                         <h6 class="text-white text-capitalize ps-3 mb-0">
-                            <h6 class="text-white text-capitalize ps-3 mb-0">
-
-                                <?php if ((int)$type === 0): ?>
-
-                                    Purchase Approval
-
-                                <?php elseif ((int)$type === 1): ?>
-
-                                    Sales Approval
-
-                                <?php endif; ?>
-
-                            </h6>
-
+                            Payment Approval
                         </h6>
 
                     </div>
@@ -39,12 +20,13 @@ $orders = array_merge(
                 </div>
 
 
-                <!-- Filters -->
+                <!-- FILTERS -->
                 <div class="card-body px-4 pb-2">
 
-                    <form method="get" class="mb-4 row g-3 align-items-end">
+                    <form method="get"
+                          class="mb-4 row g-3 align-items-end">
 
-                        <!-- Start Date -->
+                        <!-- START DATE -->
                         <div class="col-md-2">
 
                             <label class="form-label fw-bold">
@@ -52,13 +34,14 @@ $orders = array_merge(
                             </label>
 
                             <input type="date"
-                                name="start_date"
-                                class="form-control border border-dark rounded">
+                                   name="start_date"
+                                   class="form-control border border-dark rounded"
+                                   value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>">
 
                         </div>
 
 
-                        <!-- End Date -->
+                        <!-- END DATE -->
                         <div class="col-md-2">
 
                             <label class="form-label fw-bold">
@@ -66,15 +49,14 @@ $orders = array_merge(
                             </label>
 
                             <input type="date"
-                                name="end_date"
-                                class="form-control border border-dark rounded">
+                                   name="end_date"
+                                   class="form-control border border-dark rounded"
+                                   value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>">
 
                         </div>
 
 
-
-
-                        <!-- Status -->
+                        <!-- STATUS -->
                         <div class="col-md-2">
 
                             <label class="form-label fw-bold">
@@ -82,26 +64,38 @@ $orders = array_merge(
                             </label>
 
                             <select name="approval_status"
-                                class="form-select border border-dark rounded">
+                                    class="form-select border border-dark rounded">
 
                                 <option value="">
                                     All Status
                                 </option>
 
-                                <option value="waiting">
-                                    Waiting
-                                </option>
-
-                                <option value="pending">
+                                <option value="0"
+                                    <?= ($_GET['approval_status'] ?? '') === '0'
+                                        ? 'selected'
+                                        : '' ?>>
                                     Pending
                                 </option>
 
-                                <option value="approved">
+                                <option value="1"
+                                    <?= ($_GET['approval_status'] ?? '') === '1'
+                                        ? 'selected'
+                                        : '' ?>>
                                     Approved
                                 </option>
 
-                                <option value="rejected">
+                                <option value="2"
+                                    <?= ($_GET['approval_status'] ?? '') === '2'
+                                        ? 'selected'
+                                        : '' ?>>
                                     Rejected
+                                </option>
+
+                                <option value="3"
+                                    <?= ($_GET['approval_status'] ?? '') === '3'
+                                        ? 'selected'
+                                        : '' ?>>
+                                    For Further Approval
                                 </option>
 
                             </select>
@@ -109,7 +103,7 @@ $orders = array_merge(
                         </div>
 
 
-                        <!-- Search -->
+                        <!-- SEARCH -->
                         <div class="col-md-3">
 
                             <label class="form-label fw-bold">
@@ -117,25 +111,26 @@ $orders = array_merge(
                             </label>
 
                             <input type="text"
-                                name="search"
-                                class="form-control border border-dark rounded"
-                                placeholder="Document No / Vendor">
+                                   name="search"
+                                   class="form-control border border-dark rounded"
+                                   placeholder="Reference / Voucher / Payer"
+                                   value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
 
                         </div>
 
 
-                        <!-- Buttons -->
-                        <div class="col-md-1 d-flex justify-content-end">
+                        <!-- BUTTONS -->
+                        <div class="col-md-2 d-flex gap-2">
 
                             <button type="submit"
-                                class="btn btn-primary me-2">
+                                    class="btn btn-primary">
 
                                 <i class="fa fa-search"></i>
 
                             </button>
 
-                            <a href="<?= base_url('Approval/approval_in') ?>"
-                                class="btn btn-secondary">
+                            <a href="<?= base_url('approval/payment_approval_in') ?>"
+                               class="btn btn-secondary">
 
                                 <i class="fa fa-sync-alt"></i>
 
@@ -146,19 +141,22 @@ $orders = array_merge(
                     </form>
 
 
-                    <!-- Table -->
+                    <!-- PAYMENT TABLE -->
                     <div class="table-responsive">
 
                         <table class="table align-items-center mb-0">
 
                             <thead>
+
                                 <tr>
 
                                     <th>Date</th>
 
-                                    <th>Doc. No.</th>
+                                    <th>Reference</th>
 
-                                    <th>Vendor</th>
+                                    <th>Voucher No.</th>
+
+                                    <th>Receiver / Payer</th>
 
                                     <th class="text-end">
                                         Amount
@@ -175,40 +173,60 @@ $orders = array_merge(
                                     </th>
 
                                 </tr>
+
                             </thead>
 
 
                             <tbody>
 
-                                <?php if (!empty($orders)): ?>
+                                <?php if (!empty($payments)): ?>
 
-                                    <?php foreach ($orders as $row): ?>
+                                    <?php foreach ($payments as $row): ?>
 
                                         <tr>
 
-                                            <!-- TYPE -->
-
-
-
                                             <!-- DATE -->
                                             <td>
-                                                <?= !empty($row['inv_date'])
-                                                    ? date('d-M-Y', strtotime($row['inv_date']))
+
+                                                <?= !empty($row['date'])
+                                                    ? date(
+                                                        'd-M-Y',
+                                                        strtotime($row['date'])
+                                                    )
                                                     : '-' ?>
+
                                             </td>
 
 
-                                            <!-- DOCUMENT NO -->
+                                            <!-- REFERENCE -->
                                             <td>
+
                                                 <strong>
-                                                    <?= htmlspecialchars($row['reference'] ?? '-') ?>
+                                                    <?= htmlspecialchars(
+                                                        $row['reference'] ?? '-'
+                                                    ) ?>
                                                 </strong>
+
                                             </td>
 
 
-                                            <!-- VENDOR / CUSTOMER -->
+                                            <!-- VOUCHER -->
                                             <td>
-                                                <?= htmlspecialchars($row['vendor_name'] ?? '-') ?>
+
+                                                <?= htmlspecialchars(
+                                                    $row['voucher_no'] ?? '-'
+                                                ) ?>
+
+                                            </td>
+
+
+                                            <!-- RECEIVER / PAYER -->
+                                            <td>
+
+                                                <?= htmlspecialchars(
+                                                    $row['receiver_payer'] ?? '-'
+                                                ) ?>
+
                                             </td>
 
 
@@ -216,11 +234,9 @@ $orders = array_merge(
                                             <td class="text-end">
 
                                                 <?= number_format(
-                                                    (float)($row['grand_total'] ?? 0),
+                                                    (float)($row['amount'] ?? 0),
                                                     2
                                                 ) ?>
-
-                                                SAR
 
                                             </td>
 
@@ -228,24 +244,32 @@ $orders = array_merge(
                                             <!-- FROM -->
                                             <td>
 
-                                                <?php if ((int)($row['transfer_from'] ?? 0) === 0): ?>
+                                                <?php if (
+                                                    (int)($row['transfer_from'] ?? 0) === 0
+                                                ): ?>
 
-                                                    <strong>Created</strong>
+                                                    <strong>
+                                                        Created
+                                                    </strong>
 
                                                 <?php else: ?>
 
                                                     <strong>
+
                                                         <?= htmlspecialchars(
                                                             $row['employee_name'] ?? '-'
                                                         ) ?>
+
                                                     </strong>
 
                                                     <br>
 
                                                     <small class="text-secondary">
+
                                                         <?= htmlspecialchars(
                                                             $row['designation_name'] ?? '-'
                                                         ) ?>
+
                                                     </small>
 
                                                 <?php endif; ?>
@@ -257,39 +281,61 @@ $orders = array_merge(
                                             <td class="text-center">
 
                                                 <?php
-                                                $approval_status = (int)($row['approval_status'] ?? 0);
+
+                                                $approval_status =
+                                                    (int)($row['approval_status'] ?? 0);
 
                                                 switch ($approval_status) {
 
                                                     case 0:
+
                                                         $status_text = 'Pending';
-                                                        $status_class = 'bg-gradient-warning';
+                                                        $status_class =
+                                                            'bg-gradient-warning';
+
                                                         break;
 
                                                     case 1:
+
                                                         $status_text = 'Approved';
-                                                        $status_class = 'bg-gradient-success';
+                                                        $status_class =
+                                                            'bg-gradient-success';
+
                                                         break;
 
                                                     case 2:
+
                                                         $status_text = 'Rejected';
-                                                        $status_class = 'bg-gradient-danger';
+                                                        $status_class =
+                                                            'bg-gradient-danger';
+
                                                         break;
 
                                                     case 3:
-                                                        $status_text = 'Waiting';
-                                                        $status_class = 'bg-gradient-secondary';
+
+                                                        $status_text =
+                                                            'For Further Approval';
+
+                                                        $status_class =
+                                                            'bg-gradient-secondary';
+
                                                         break;
 
                                                     default:
+
                                                         $status_text = 'Unknown';
-                                                        $status_class = 'bg-gradient-dark';
+                                                        $status_class =
+                                                            'bg-gradient-dark';
+
                                                         break;
                                                 }
+
                                                 ?>
 
                                                 <span class="badge <?= $status_class ?>">
+
                                                     <?= $status_text ?>
+
                                                 </span>
 
                                             </td>
@@ -300,45 +346,29 @@ $orders = array_merge(
 
                                                 <div class="d-flex justify-content-end gap-1">
 
-                                                    <!-- EDIT / APPROVAL -->
+
+                                                    <!-- APPROVAL BUTTON -->
                                                     <button type="button"
-                                                        class="badge bg-gradient-dark badge-sm border-0"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#approvalModal_<?= (int)$row['approval_id'] ?>">
+                                                            class="badge bg-gradient-dark badge-sm border-0"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#paymentApprovalModal_<?= (int)$row['approval_id'] ?>">
 
                                                         <i class="fa fa-pencil"></i>
 
                                                     </button>
 
 
-                                                    <!-- VIEW -->
-                                                    <?php if ((int)$row['type'] === 0): ?>
+                                                    <!-- VIEW PAYMENT -->
+                                                    <a href="<?= base_url(
+                                                        'approval/view_payment?reference=' .
+                                                        urlencode($row['reference'])
+                                                    ) ?>"
+                                                       class="badge bg-gradient-secondary badge-sm"
+                                                       title="View Payment">
 
-                                                        <!-- PURCHASE -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewpurorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Purchase Order">
+                                                        <i class="fa fa-eye"></i>
 
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php elseif ((int)$row['type'] === 1): ?>
-
-                                                        <!-- SALES -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewsalesorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Sales Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php endif; ?>
+                                                    </a>
 
                                                 </div>
 
@@ -348,14 +378,18 @@ $orders = array_merge(
 
                                     <?php endforeach; ?>
 
+
                                 <?php else: ?>
 
                                     <tr>
 
-                                        <td colspan="8" class="text-center py-4">
+                                        <td colspan="8"
+                                            class="text-center py-4">
 
                                             <span class="text-secondary">
-                                                No orders found for approval.
+
+                                                No payments found for approval.
+
                                             </span>
 
                                         </td>
@@ -367,108 +401,157 @@ $orders = array_merge(
                             </tbody>
 
                         </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php if (!empty($orders)): ?>
 
-        <?php foreach ($orders as $row): ?>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- PAYMENT APPROVAL MODALS -->
+    <!-- ===================================================== -->
+
+    <?php if (!empty($payments)): ?>
+
+        <?php foreach ($payments as $row): ?>
 
             <div class="modal fade"
-                id="approvalModal_<?= (int)$row['approval_id'] ?>"
-                tabindex="-1"
-                aria-hidden="true">
-
-
-
+                 id="paymentApprovalModal_<?= (int)$row['approval_id'] ?>"
+                 tabindex="-1"
+                 aria-hidden="true">
 
                 <div class="modal-dialog modal-md modal-dialog-centered">
 
                     <div class="modal-content">
 
                         <form method="post"
-                            action="<?= base_url('approval/saveapproval') ?>" class="approval-form">
+                              action="<?= base_url('approval/payment_saveapproval') ?>"
+                              class="approval-form">
 
+
+                            <!-- HEADER -->
                             <div class="modal-header py-2">
 
                                 <h5 class="modal-title">
-                                    Change Status
+                                    Payment Approval
                                 </h5>
 
                                 <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal">
+                                        class="btn-close"
+                                        data-bs-dismiss="modal">
                                 </button>
 
                             </div>
 
 
+                            <!-- BODY -->
                             <div class="modal-body">
+
 
                                 <!-- APPROVAL ID -->
                                 <input type="hidden"
-                                    name="approval_id"
-                                    value="<?= (int)$row['approval_id'] ?>">
+                                       name="approval_id"
+                                       id="payment_approval_id"
+                                       value="<?= (int)$row['approval_id'] ?>">
 
 
                                 <!-- DOCUMENT ID -->
                                 <input type="hidden"
-                                    name="doc_id"
-                                    value="<?= (int)$row['doc_id'] ?>">
+                                       name="doc_id"
+                                       id="payment_doc_id"
+                                       value="<?= htmlspecialchars(
+                                           $row['doc_id'] ?? ''
+                                       ) ?>">
 
 
                                 <!-- TYPE -->
                                 <input type="hidden"
-                                    name="type"
-                                    value="<?= (int)($row['type'] ?? 0) ?>">
+                                       name="type"
+                                       value="2">
 
 
-                                <!-- CURRENT TRANSFER FROM -->
+                                <!-- TRANSFER FROM -->
                                 <input type="hidden"
-                                    name="transfer_from"
-                                    value="<?= (int)($row['transfer_from'] ?? 0) ?>">
+                                       name="transfer_from"
+                                       id="payment_transfer_from"
+                                       value="<?= (int)(
+                                           $row['transfer_from'] ?? 0
+                                       ) ?>">
 
 
-                                <!-- CURRENT TRANSFER TO -->
+                                <!-- TRANSFER TO -->
                                 <input type="hidden"
-                                    name="transfer_to"
-                                    value="<?= (int)($row['transfer_to'] ?? 0) ?>">
+                                       name="transfer_to"
+                                       id="payment_transfer_to"
+                                       value="<?= (int)(
+                                           $row['transfer_to'] ?? 0
+                                       ) ?>">
 
 
-                                <!-- PO INFORMATION -->
+                                <!-- PAYMENT INFORMATION -->
 
                                 <div class="row mb-3">
+
 
                                     <div class="col-6">
 
                                         <div>
+
                                             <span class="text-muted">
-                                                No :
+                                                Reference :
                                             </span>
 
                                             <strong>
+
                                                 <?= htmlspecialchars(
                                                     $row['reference'] ?? '-'
                                                 ) ?>
+
                                             </strong>
+
                                         </div>
 
 
                                         <div>
+
                                             <span class="text-muted">
                                                 Date :
                                             </span>
 
                                             <strong>
-                                                <?= !empty($row['inv_date'])
+
+                                                <?= !empty($row['date'])
                                                     ? date(
                                                         'd-M-Y',
-                                                        strtotime($row['inv_date'])
+                                                        strtotime($row['date'])
                                                     )
                                                     : '-' ?>
+
                                             </strong>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <span class="text-muted">
+                                                Voucher :
+                                            </span>
+
+                                            <strong>
+
+                                                <?= htmlspecialchars(
+                                                    $row['voucher_no'] ?? '-'
+                                                ) ?>
+
+                                            </strong>
+
                                         </div>
 
                                     </div>
@@ -477,32 +560,39 @@ $orders = array_merge(
                                     <div class="col-6">
 
                                         <div>
+
                                             <span class="text-muted">
                                                 Amount :
                                             </span>
 
                                             <strong>
+
                                                 <?= number_format(
                                                     (float)(
-                                                        $row['grand_total'] ?? 0
+                                                        $row['amount'] ?? 0
                                                     ),
                                                     2
                                                 ) ?>
-                                                SAR
+
                                             </strong>
+
                                         </div>
 
 
                                         <div>
+
                                             <span class="text-muted">
-                                                Vendor :
+                                                Receiver / Payer :
                                             </span>
 
                                             <strong>
+
                                                 <?= htmlspecialchars(
-                                                    $row['vendor_name'] ?? '-'
+                                                    $row['receiver_payer'] ?? '-'
                                                 ) ?>
+
                                             </strong>
+
                                         </div>
 
                                     </div>
@@ -513,8 +603,7 @@ $orders = array_merge(
                                 <hr>
 
 
-                                <!-- DATE -->
-
+                                <!-- APPROVAL DATE -->
                                 <div class="mb-3">
 
                                     <label class="form-label">
@@ -522,15 +611,14 @@ $orders = array_merge(
                                     </label>
 
                                     <input type="date"
-                                        name="approval_date"
-                                        class="form-control"
-                                        value="<?= date('Y-m-d') ?>">
+                                           name="approval_date"
+                                           class="form-control"
+                                           value="<?= date('Y-m-d') ?>">
 
                                 </div>
 
 
                                 <!-- STATUS -->
-
                                 <div class="mb-3">
 
                                     <label class="form-label">
@@ -538,37 +626,25 @@ $orders = array_merge(
                                     </label>
 
                                     <select name="status"
-                                        class="form-select approval-status">
+                                            class="form-select approval-status">
 
                                         <option value="">
                                             Select Status
                                         </option>
 
-                                        <option value="0"
-                                            <?= (int)($row['approval_status'] ?? 0) === 0
-                                                ? 'selected'
-                                                : '' ?>>
+                                        <option value="0">
                                             Pending
                                         </option>
 
-                                        <option value="1"
-                                            <?= (int)($row['approval_status'] ?? 0) === 1
-                                                ? 'selected'
-                                                : '' ?>>
+                                        <option value="1">
                                             Approved
                                         </option>
 
-                                        <option value="2"
-                                            <?= (int)($row['approval_status'] ?? 0) === 2
-                                                ? 'selected'
-                                                : '' ?>>
+                                        <option value="2">
                                             Rejected
                                         </option>
 
-                                        <option value="3"
-                                            <?= (int)($row['approval_status'] ?? 0) === 3
-                                                ? 'selected'
-                                                : '' ?>>
+                                        <option value="3">
                                             For Further Approval
                                         </option>
 
@@ -578,16 +654,13 @@ $orders = array_merge(
 
 
                                 <!-- FURTHER APPROVAL -->
-
                                 <div class="further-approval-section mb-3"
-                                    style="<?= (int)($row['approval_status'] ?? 0) === 3
-                                                ? ''
-                                                : 'display:none;' ?>">
+                                     style="display:none;">
 
                                     <div class="row">
 
-                                        <!-- DESIGNATION -->
 
+                                        <!-- DESIGNATION -->
                                         <div class="col-6">
 
                                             <label class="form-label">
@@ -595,7 +668,7 @@ $orders = array_merge(
                                             </label>
 
                                             <select name="designation_id"
-                                                class="form-select approval-designation">
+                                                    class="form-select approval-designation">
 
                                                 <option value="">
                                                     Select Designation
@@ -603,10 +676,18 @@ $orders = array_merge(
 
                                                 <?php if (!empty($designation)): ?>
 
-                                                    <?php foreach ($designation as $desig): ?>
+                                                    <?php foreach (
+                                                        $designation as $desig
+                                                    ): ?>
 
-                                                        <option value="<?= html_escape($desig['id']) ?>">
-                                                            <?= html_escape($desig['name']) ?>
+                                                        <option value="<?= html_escape(
+                                                            $desig['id']
+                                                        ) ?>">
+
+                                                            <?= html_escape(
+                                                                $desig['name']
+                                                            ) ?>
+
                                                         </option>
 
                                                     <?php endforeach; ?>
@@ -619,7 +700,6 @@ $orders = array_merge(
 
 
                                         <!-- EMPLOYEE -->
-
                                         <div class="col-6">
 
                                             <label class="form-label">
@@ -627,8 +707,8 @@ $orders = array_merge(
                                             </label>
 
                                             <select name="employee_id"
-                                                class="form-select approval-employee"
-                                                disabled>
+                                                    class="form-select approval-employee"
+                                                    disabled>
 
                                                 <option value="">
                                                     Select Employee
@@ -643,8 +723,23 @@ $orders = array_merge(
                                 </div>
 
 
-                                <!-- REMARKS -->
+                                <!-- DESCRIPTION -->
+                                <div class="mb-3">
 
+                                    <label class="form-label">
+                                        Description
+                                    </label>
+
+                                    <textarea class="form-control"
+                                              rows="2"
+                                              readonly><?= htmlspecialchars(
+                                                  $row['description'] ?? ''
+                                              ) ?></textarea>
+
+                                </div>
+
+
+                                <!-- REMARK -->
                                 <div class="mb-3">
 
                                     <label class="form-label">
@@ -652,21 +747,24 @@ $orders = array_merge(
                                     </label>
 
                                     <textarea name="remarks"
-                                        class="form-control"
-                                        rows="3"><?= htmlspecialchars(
-                                                        $row['remark'] ?? ''
-                                                    ) ?></textarea>
+                                              class="form-control"
+                                              rows="3"><?= htmlspecialchars(
+                                                  $row['approval_remark']
+                                                      ?? $row['remark']
+                                                      ?? ''
+                                              ) ?></textarea>
 
                                 </div>
 
                             </div>
 
 
+                            <!-- FOOTER -->
                             <div class="modal-footer py-2">
 
                                 <button type="button"
-                                    class="btn btn-secondary btn-sm"
-                                    data-bs-dismiss="modal">
+                                        class="btn btn-secondary btn-sm"
+                                        data-bs-dismiss="modal">
 
                                     CANCEL
 
@@ -674,7 +772,7 @@ $orders = array_merge(
 
 
                                 <button type="submit"
-                                    class="btn btn-primary btn-sm">
+                                        class="btn btn-primary btn-sm">
 
                                     CONFIRM
 
@@ -694,10 +792,11 @@ $orders = array_merge(
 
     <?php endif; ?>
 
+</div>
 
-    <script>
-        // =--------------------------------form validation & message---------------------------------
-        function showFlashMessage(type, message) {
+
+<script>
+     function showFlashMessage(type, message) {
 
             let alertId = type + 'AlertDynamic';
 
@@ -792,102 +891,20 @@ $orders = array_merge(
 
             }, 3000);
         }
-        $(document).on('submit', '.approval-form', function(e) {
 
-            const form = $(this);
-
-            const status = form.find('select[name="status"]').val();
-
-            // STATUS VALIDATION
-            if (status === '') {
-
-                e.preventDefault();
-
-                showFlashMessage(
-                    'error',
-                    'Please select an approval status.'
-                );
-
-                return false;
-            }
-
-            // FURTHER APPROVAL VALIDATION
-            if (status === '3') {
-
-                const designation = form
-                    .find('select[name="designation_id"]')
-                    .val();
-
-                const employee = form
-                    .find('select[name="employee_id"]')
-                    .val();
-
-                if (!designation) {
-
-                    e.preventDefault();
-
-                    showFlashMessage(
-                        'error',
-                        'Please select a designation.'
-                    );
-
-                    return false;
-                }
-
-                if (!employee) {
-
-                    e.preventDefault();
-
-                    showFlashMessage(
-                        'error',
-                        'Please select an employee for further approval.'
-                    );
-
-                    return false;
-                }
-            }
-
-            // APPROVED
-
-
-            // Everything is valid
-            return true;
-        });
-
-
-        <?php
-        $successMessage = $this->session->flashdata('success');
-        $errorMessage   = $this->session->flashdata('error');
-        ?>
-
-        <?php if (!empty($successMessage)): ?>
-
-            showFlashMessage(
-                'success',
-                <?= json_encode($successMessage) ?>
-            );
-
-        <?php endif; ?>
-
-        <?php if (!empty($errorMessage)): ?>
-
-            showFlashMessage(
-                'error',
-                <?= json_encode($errorMessage) ?>
-            );
-
-        <?php endif; ?>
-        // =-=-=-=-=-=-=-=------------------------------------------
-
-
-
-        $(document).on('change', '.approval-status', function() {
+    /*
+     * Show / hide further approval
+     */
+    $(document).on(
+        'change',
+        '.approval-status',
+        function() {
 
             const section = $(this)
                 .closest('.modal')
                 .find('.further-approval-section');
 
-            if ($(this).val() == '3') {
+            if ($(this).val() === '3') {
 
                 section.show();
 
@@ -895,42 +912,65 @@ $orders = array_merge(
 
                 section.hide();
 
-                section.find('select[name="designation_id"]').val('');
+                section.find(
+                    'select[name="designation_id"]'
+                ).val('');
 
-                section.find('select[name="employee_id"]')
-                    .html('<option value="">Select Employee</option>');
+                section.find(
+                    'select[name="employee_id"]'
+                )
+                .html(
+                    '<option value="">Select Employee</option>'
+                )
+                .prop('disabled', true);
+
             }
 
-        });
+        }
+    );
 
-        // =-=-=--------------------designation based emplye-----------------------------------
-        $(document).on('change', '.approval-designation', function() {
+
+    /*
+     * Get employees by designation
+     */
+    $(document).on(
+        'change',
+        '.approval-designation',
+        function() {
 
             const designationId = $(this).val();
 
             const modal = $(this).closest('.modal');
 
-            const employeeSelect = modal.find('.approval-employee');
+            const employeeSelect =
+                modal.find('.approval-employee');
 
-            console.log('Designation ID:', designationId);
 
             if (!designationId) {
 
                 employeeSelect
-                    .html('<option value="">Select Employee</option>')
+                    .html(
+                        '<option value="">Select Employee</option>'
+                    )
                     .prop('disabled', true);
 
                 return;
+
             }
 
+
             employeeSelect
-                .html('<option value="">Loading...</option>')
+                .html(
+                    '<option value="">Loading...</option>'
+                )
                 .prop('disabled', true);
 
 
             $.ajax({
 
-                url: "<?= base_url('approval/getemployeesbydesignation') ?>",
+                url: "<?= base_url(
+                    'approval/getemployeesbydesignation'
+                ) ?>",
 
                 type: "GET",
 
@@ -942,44 +982,47 @@ $orders = array_merge(
 
                 success: function(response) {
 
-                    console.log('API Response:', response);
+                    console.log(
+                        'Employee API Response:',
+                        response
+                    );
 
-                    // Clear dropdown
+
                     employeeSelect.empty();
 
-                    // Default option
+
                     employeeSelect.append(
                         '<option value="">Select Employee</option>'
                     );
 
 
-                    // IMPORTANT:
-                    // Employees are inside response.data.employees
-
                     if (
                         response.status === true &&
                         response.data &&
-                        Array.isArray(response.data.employees)
+                        Array.isArray(
+                            response.data.employees
+                        )
                     ) {
 
-                        $.each(response.data.employees, function(index, employee) {
+                        $.each(
+                            response.data.employees,
+                            function(index, employee) {
 
-                            console.log(
-                                'Employee:',
-                                employee.id,
-                                employee.name
-                            );
+                                employeeSelect.append(
+                                    $('<option>', {
+                                        value: employee.id,
+                                        text: employee.name
+                                    })
+                                );
 
-                            employeeSelect.append(
-                                $('<option>', {
-                                    value: employee.id,
-                                    text: employee.name
-                                })
-                            );
+                            }
+                        );
 
-                        });
 
-                        employeeSelect.prop('disabled', false);
+                        employeeSelect.prop(
+                            'disabled',
+                            false
+                        );
 
                     } else {
 
@@ -993,15 +1036,194 @@ $orders = array_merge(
 
                 error: function(xhr) {
 
-                    console.log('AJAX ERROR:', xhr.responseText);
+                    console.log(
+                        'Employee AJAX ERROR:',
+                        xhr.responseText
+                    );
 
                     employeeSelect
-                        .html('<option value="">Error loading employees</option>')
+                        .html(
+                            '<option value="">Error loading employees</option>'
+                        )
                         .prop('disabled', true);
 
                 }
 
             });
 
+        }
+    );
+
+
+    /*
+     * Form validation
+     */
+   $(document).on(
+    'submit',
+    '.approval-form',
+    function(e) {
+
+        e.preventDefault();
+
+        const form = $(this);
+
+        const status = form
+            .find('select[name="status"]')
+            .val();
+
+        /*
+         * Validate status
+         */
+        if (status === '') {
+
+            showFlashMessage(
+                'error',
+                'Please select an approval status.'
+            );
+
+            return false;
+        }
+
+
+        /*
+         * Validate further approval
+         */
+        if (status === '3') {
+
+            const designation = form
+                .find('select[name="designation_id"]')
+                .val();
+
+            const employee = form
+                .find('select[name="employee_id"]')
+                .val();
+
+
+            if (!designation) {
+
+                showFlashMessage(
+                    'error',
+                    'Please select a designation.'
+                );
+
+                return false;
+            }
+
+
+            if (!employee) {
+
+                showFlashMessage(
+                    'error',
+                    'Please select an employee for further approval.'
+                );
+
+                return false;
+            }
+        }
+
+
+        /*
+         * AJAX SUBMIT
+         */
+        $.ajax({
+
+            url: form.attr('action'),
+
+            type: 'POST',
+
+            data: form.serialize(),
+
+            dataType: 'json',
+
+            beforeSend: function() {
+
+                form.find('button[type="submit"]')
+                    .prop('disabled', true)
+                    .text('PROCESSING...');
+            },
+
+            success: function(response) {
+
+                console.log(
+                    'Payment Approval Response:',
+                    response
+                );
+
+
+                if (response.status === true) {
+
+                    showFlashMessage(
+                        'success',
+                        response.message ||
+                        'Payment approved successfully.'
+                    );
+
+
+                    /*
+                     * Close current modal
+                     */
+                    const modalElement =
+                        form.closest('.modal')[0];
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalElement
+                        );
+
+                    if (modal) {
+                        modal.hide();
+                    }
+
+
+                    /*
+                     * Reload after success
+                     */
+                    setTimeout(function() {
+
+                        location.reload();
+
+                    }, 800);
+
+
+                } else {
+
+                    showFlashMessage(
+                        'error',
+                        response.message ||
+                        'Payment approval failed.'
+                    );
+
+
+                    form.find('button[type="submit"]')
+                        .prop('disabled', false)
+                        .text('CONFIRM');
+                }
+
+            },
+
+            error: function(xhr) {
+
+                console.log(
+                    'Payment Approval AJAX ERROR:',
+                    xhr.responseText
+                );
+
+
+                showFlashMessage(
+                    'error',
+                    'Payment approval failed. Check console for details.'
+                );
+
+
+                form.find('button[type="submit"]')
+                    .prop('disabled', false)
+                    .text('CONFIRM');
+            }
+
         });
-    </script>
+
+        return false;
+    }
+);
+
+</script>

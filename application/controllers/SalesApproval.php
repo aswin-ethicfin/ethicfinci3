@@ -362,6 +362,7 @@ class SalesApproval extends CI_Controller
             return;
         }
     
+
         if (empty($approval_id)) {
     
             $this->session->set_flashdata(
@@ -814,3 +815,235 @@ class SalesApproval extends CI_Controller
         redirect('approval/approval_in');
     }
 }
+
+    // public function approval_in()
+    // {
+    //     $sdata['approval_window'] = 'active bg-gradient-';
+    //     $sdata['index'] = '';
+
+    //     $ndata['bn1']   = $this->lang->line('dashboard');
+    //     $ndata['bn3']   = 'Document Approval';
+    //     $ndata['title'] = 'Document Approval';
+
+    //     $rdata['pagetitle'] = 'Document Approval';
+
+    //     // Logged-in user's profile ID
+    //     //$profile_id = $this->session->userdata('profile_id');
+    //     $profile_id = 1;
+
+    //     $rdata['purchase_orders'] = [];
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | GET DESIGNATIONS
+    //     |--------------------------------------------------------------------------
+    //     | Only active designations (status = 0)
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $rdata['designation'] = $this->Approval_model->get_specific_columns(
+    //         'tbl_designation',
+    //         ['id', 'name'],
+    //         [
+    //             'status' => 0
+    //         ]
+    //     );
+
+
+    //     // DEBUG - temporarily check what is coming
+    //     // echo '<pre>';
+    //     // print_r($rdata['designation']);
+    //     // exit;
+
+
+    //     if (!empty($profile_id)) {
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | GET ALL APPROVAL RECORDS
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $approvalData = $this->Approval_model->getJoinedDataPagination(
+    //             'tbl_document_approval da',
+    //             [
+    //                 'tbl_purchase_order po' => 'po.id = da.doc_id',
+    //                 'tbl_profile p'         => 'p.id = po.profile_id',
+    //                 'tbl_employee e'        => 'e.id = da.transfer_from',
+    //                 'tbl_designation d'     => 'd.id = e.designation'
+    //             ],
+    //             '
+    //                 po.id,
+    //                 po.reference,
+    //                 po.inv_no,
+    //                 po.inv_date,
+    //                 po.due_date,
+    //                 po.profile_id,
+    //                 po.grand_total,
+    //                 po.payment_status,
+    //                 po.status,
+
+    //                 p.name AS vendor_name,
+
+    //                 da.id AS approval_id,
+    //                 da.doc_id,
+    //                 da.type,
+    //                 da.transfer_from,
+    //                 da.transfer_to,
+    //                 da.approval_status,
+    //                 da.remark,
+    //                 da.transfer_from_datetime,
+    //                 da.transfer_to_datetime,
+    //                 da.action_datetime,
+
+    //                 e.name AS employee_name,
+
+    //                 d.name AS designation_name
+    //             ',
+    //             [
+    //                 'da.type'   => 0,
+    //                 'po.status' => 0
+    //             ],
+    //             'array',
+    //             '',
+    //             [
+    //                 'da.id' => 'DESC'
+    //             ]
+    //         );
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | KEEP ONLY LAST APPROVAL ENTRY FOR EACH DOC_ID
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $latestApprovals = [];
+
+    //         if (!empty($approvalData)) {
+
+    //             foreach ($approvalData as $row) {
+
+    //                 $doc_id = (int)$row['doc_id'];
+
+    //                 if (!isset($latestApprovals[$doc_id])) {
+
+    //                     $latestApprovals[$doc_id] = $row;
+    //                 }
+    //             }
+    //         }
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | CHECK LAST ENTRY TRANSFER_TO
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         foreach ($latestApprovals as $row) {
+
+    //             if ((int)$row['transfer_to'] === (int)$profile_id) {
+
+    //                 $rdata['purchase_orders'][] = $row;
+    //             }
+    //         }
+    //     }
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | VIEW
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $this->view_function1(
+    //         'approval/approval_in',
+    //         $rdata,
+    //         $sdata,
+    //         $ndata
+    //     );
+    // }
+
+    // public function approval_out()
+    // {
+    //     $sdata['approval_window'] = 'active bg-gradient-';
+    //     $sdata['index'] = '';
+
+    //     $ndata['bn1']   = $this->lang->line('dashboard');
+    //     $ndata['bn3']   = 'Document Approval Out';
+    //     $ndata['title'] = 'Document Approval Out';
+
+    //     $rdata['pagetitle'] = 'Document Approval Out';
+
+    //     // Logged-in user's profile ID
+    //     //$profile_id = $this->session->userdata('profile_id');
+    //     $profile_id = 1;
+
+    //     $rdata['purchase_orders'] = [];
+
+    //     if (!empty($profile_id)) {
+
+    //         $rdata['purchase_orders'] = $this->Approval_model->getJoinedDataPagination(
+    //             'tbl_document_approval da',
+
+    //             [
+    //                 'tbl_purchase_order po' => 'po.id = da.doc_id',
+    //                 'tbl_profile p'         => 'p.id = po.profile_id',
+    //                 'tbl_employee e'        => 'e.id = da.transfer_from',
+    //                 'tbl_designation d'     => 'd.id = e.designation'
+    //             ],
+
+    //             '
+    //                 po.id,
+    //                 po.reference,
+    //                 po.inv_no,
+    //                 po.inv_date,
+    //                 po.due_date,
+    //                 po.profile_id,
+    //                 po.grand_total,
+    //                 po.payment_status,
+    //                 po.status,
+
+    //                 p.name AS vendor_name,
+
+    //                 da.id AS approval_id,
+    //                 da.doc_id,
+    //                 da.type,
+    //                 da.transfer_from,
+    //                 da.transfer_to,
+    //                 da.approval_status,
+    //                 da.remark,
+    //                 da.transfer_from_datetime,
+    //                 da.transfer_to_datetime,
+    //                 da.action_datetime,
+
+    //                 e.name AS employee_name,
+    //                 d.name AS designation_name
+    //             ',
+
+    //             [
+    //                 'da.type'         => 0, // Purchase Order
+    //                 'da.transfer_from' => $profile_id,
+    //                 'po.status'       => 0
+    //             ],
+
+    //             'array',
+    //             '',
+
+    //             [
+    //                 'da.id' => 'DESC'
+    //             ]
+    //         );
+    //     }
+
+    //     $this->view_function1(
+    //         'approval/approval_out',
+    //         $rdata,
+    //         $sdata,
+    //         $ndata
+    //     );
+    // }  
+
+  
+ 

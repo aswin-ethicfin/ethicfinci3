@@ -1,9 +1,3 @@
-<?php
-$orders = array_merge(
-    $purchase_orders ?? [],
-    $sales_orders ?? []
-);
-?>
 <div class="container-fluid py-4">
 
     <div class="row">
@@ -20,15 +14,7 @@ $orders = array_merge(
                         <h6 class="text-white text-capitalize ps-3 mb-0">
                             <h6 class="text-white text-capitalize ps-3 mb-0">
 
-                                <?php if ((int)$type === 0): ?>
-
-                                    Purchase Approval
-
-                                <?php elseif ((int)$type === 1): ?>
-
-                                    Sales Approval
-
-                                <?php endif; ?>
+                                purchase order
 
                             </h6>
 
@@ -146,6 +132,7 @@ $orders = array_merge(
                     </form>
 
 
+
                     <!-- Table -->
                     <div class="table-responsive">
 
@@ -155,6 +142,7 @@ $orders = array_merge(
                                 <tr>
 
                                     <th>Date</th>
+                                    <th>Branch</th>
 
                                     <th>Doc. No.</th>
 
@@ -164,7 +152,7 @@ $orders = array_merge(
                                         Amount
                                     </th>
 
-                                    <th>From</th>
+
 
                                     <th class="text-center">
                                         Status
@@ -186,161 +174,83 @@ $orders = array_merge(
 
                                         <tr>
 
-                                            <!-- TYPE -->
-
-
-
-                                            <!-- DATE -->
                                             <td>
                                                 <?= !empty($row['inv_date'])
                                                     ? date('d-M-Y', strtotime($row['inv_date']))
                                                     : '-' ?>
                                             </td>
 
-
-                                            <!-- DOCUMENT NO -->
                                             <td>
-                                                <strong>
-                                                    <?= htmlspecialchars($row['reference'] ?? '-') ?>
-                                                </strong>
+                                                <?= htmlspecialchars($row['branch_id'] ?? '-') ?>
                                             </td>
 
-
-                                            <!-- VENDOR / CUSTOMER -->
                                             <td>
-                                                <?= htmlspecialchars($row['vendor_name'] ?? '-') ?>
+                                                <?= htmlspecialchars($row['inv_no'] ?? '-') ?>
                                             </td>
 
+                                            <td>
+                                                <?= htmlspecialchars($row['name'] ?? '-') ?>
+                                            </td>
 
-                                            <!-- AMOUNT -->
                                             <td class="text-end">
-
                                                 <?= number_format(
                                                     (float)($row['grand_total'] ?? 0),
                                                     2
                                                 ) ?>
-
-                                                SAR
-
                                             </td>
 
-
-                                            <!-- FROM -->
-                                            <td>
-
-                                                <?php if ((int)($row['transfer_from'] ?? 0) === 0): ?>
-
-                                                    <strong>Created</strong>
-
-                                                <?php else: ?>
-
-                                                    <strong>
-                                                        <?= htmlspecialchars(
-                                                            $row['employee_name'] ?? '-'
-                                                        ) ?>
-                                                    </strong>
-
-                                                    <br>
-
-                                                    <small class="text-secondary">
-                                                        <?= htmlspecialchars(
-                                                            $row['designation_name'] ?? '-'
-                                                        ) ?>
-                                                    </small>
-
-                                                <?php endif; ?>
-
-                                            </td>
-
-
-                                            <!-- STATUS -->
                                             <td class="text-center">
 
-                                                <?php
-                                                $approval_status = (int)($row['approval_status'] ?? 0);
+                                                <?php if ((int)$row['status'] === 0): ?>
 
-                                                switch ($approval_status) {
+                                                    <span class="badge bg-warning">
+                                                        Pending
+                                                    </span>
 
-                                                    case 0:
-                                                        $status_text = 'Pending';
-                                                        $status_class = 'bg-gradient-warning';
-                                                        break;
+                                                <?php elseif ((int)$row['status'] === 1): ?>
 
-                                                    case 1:
-                                                        $status_text = 'Approved';
-                                                        $status_class = 'bg-gradient-success';
-                                                        break;
+                                                    <span class="badge bg-success">
+                                                        Approved
+                                                    </span>
 
-                                                    case 2:
-                                                        $status_text = 'Rejected';
-                                                        $status_class = 'bg-gradient-danger';
-                                                        break;
+                                                <?php elseif ((int)$row['status'] === 2): ?>
 
-                                                    case 3:
-                                                        $status_text = 'Waiting';
-                                                        $status_class = 'bg-gradient-secondary';
-                                                        break;
+                                                    <span class="badge bg-danger">
+                                                        Rejected
+                                                    </span>
 
-                                                    default:
-                                                        $status_text = 'Unknown';
-                                                        $status_class = 'bg-gradient-dark';
-                                                        break;
-                                                }
-                                                ?>
+                                                <?php endif; ?>
+                                                <button type="button"
+                                                    class="badge bg-gradient-dark badge-sm border-0"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#approvalModal_<?= (int)$row['approval_id'] ?>">
 
-                                                <span class="badge <?= $status_class ?>">
-                                                    <?= $status_text ?>
-                                                </span>
+                                                    <i class="fa fa-pencil"></i>
+
+                                                </button>
 
                                             </td>
 
-
-                                            <!-- OPERATIONS -->
                                             <td class="text-end">
 
-                                                <div class="d-flex justify-content-end gap-1">
 
-                                                    <!-- EDIT / APPROVAL -->
-                                                    <button type="button"
-                                                        class="badge bg-gradient-dark badge-sm border-0"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#approvalModal_<?= (int)$row['approval_id'] ?>">
+                                                <a href="<?= base_url(
+                                                                'addon/porders/view/' . $row['id']
+                                                            ) ?>"
+                                                    class="btn btn-sm btn-primary">
 
-                                                        <i class="fa fa-pencil"></i>
+                                                    <i class="fa fa-eye"></i>
 
-                                                    </button>
+                                                </a>
 
+                                                <a href="<?= base_url(
+                                                                'addon/porders/edit/' . $row['id']
+                                                            ) ?>"
+                                                    class="btn btn-sm btn-secondary">
 
-                                                    <!-- VIEW -->
-                                                    <?php if ((int)$row['type'] === 0): ?>
+                                                    <i class="fa fa-edit"></i>
 
-                                                        <!-- PURCHASE -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewpurorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Purchase Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php elseif ((int)$row['type'] === 1): ?>
-
-                                                        <!-- SALES -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewsalesorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Sales Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php endif; ?>
-
-                                                </div>
+                                                </a>
 
                                             </td>
 
@@ -351,18 +261,14 @@ $orders = array_merge(
                                 <?php else: ?>
 
                                     <tr>
-
-                                        <td colspan="8" class="text-center py-4">
-
-                                            <span class="text-secondary">
-                                                No orders found for approval.
-                                            </span>
-
+                                        <td colspan="7" class="text-center">
+                                            No Purchase Orders found.
                                         </td>
-
                                     </tr>
 
                                 <?php endif; ?>
+
+
 
                             </tbody>
 
@@ -422,7 +328,7 @@ $orders = array_merge(
                                 <!-- TYPE -->
                                 <input type="hidden"
                                     name="type"
-                                    value="<?= (int)($row['type'] ?? 0) ?>">
+                                    value="0">
 
 
                                 <!-- CURRENT TRANSFER FROM -->
@@ -544,26 +450,7 @@ $orders = array_merge(
                                             Select Status
                                         </option>
 
-                                        <option value="0"
-                                            <?= (int)($row['approval_status'] ?? 0) === 0
-                                                ? 'selected'
-                                                : '' ?>>
-                                            Pending
-                                        </option>
-
-                                        <option value="1"
-                                            <?= (int)($row['approval_status'] ?? 0) === 1
-                                                ? 'selected'
-                                                : '' ?>>
-                                            Approved
-                                        </option>
-
-                                        <option value="2"
-                                            <?= (int)($row['approval_status'] ?? 0) === 2
-                                                ? 'selected'
-                                                : '' ?>>
-                                            Rejected
-                                        </option>
+                                       
 
                                         <option value="3"
                                             <?= (int)($row['approval_status'] ?? 0) === 3

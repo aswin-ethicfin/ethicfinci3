@@ -247,6 +247,68 @@
         <li class="nav-item">
 
           <a data-bs-toggle="collapse"
+            href="#paymentOrderApprovals"
+            class="nav-link"
+            aria-controls="paymentOrderApprovals"
+            role="button"
+            aria-expanded="false">
+
+            <i class="material-icons-round">fact_check</i>
+
+            <span class="nav-link-text ms-2 ps-1">
+             Payment Approvals
+            </span>
+
+          </a>
+
+          <div class="collapse" id="paymentOrderApprovals">
+
+            <ul class="nav">
+
+              <!-- APPROVAL IN -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/payment_approval_in') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    1
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Payment In
+                  </span>
+
+                </a>
+
+              </li>
+
+              <!-- APPROVAL OUT -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/payment_approval_out') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    2
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Payment Out
+                  </span>
+
+                </a>
+
+              </li>
+
+            </ul>
+
+          </div>
+
+        </li>
+        <li class="nav-item">
+
+          <a data-bs-toggle="collapse"
             href="#purchaseOrderApprovals"
             class="nav-link"
             aria-controls="purchaseOrderApprovals"
