@@ -235,7 +235,6 @@
         </li>
 
 
-
         <li class="nav-item">
           <a class="nav-link text-white info" href="<?= base_url() ?>home/index">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -244,6 +243,177 @@
             <span class="nav-link-text ms-1">Dashboard</span>
           </a>
         </li>
+
+        <li class="nav-item">
+
+          <a data-bs-toggle="collapse"
+            href="#purchaseOrder"
+            class="nav-link"
+            aria-controls="purchaseOrder"
+            role="button"
+            aria-expanded="false">
+
+            <i class="material-icons-round">fact_check</i>
+
+            <span class="nav-link-text ms-2 ps-1">
+              Purchase Approval
+            </span>
+
+          </a>
+
+          <div class="collapse" id="purchaseOrder">
+
+            <ul class="nav">
+
+              <!-- APPROVAL IN -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('po/purchase_order') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    1
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    purchase order
+                  </span>
+
+                </a>
+
+              </li>
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/approval_in?type=0') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    2
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval In
+                  </span>
+
+                </a>
+
+              </li>
+
+              <!-- APPROVAL OUT -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/approval_out?type=0') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    3
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval Out
+                  </span>
+
+                </a>
+
+              </li>
+
+
+
+            </ul>
+
+          </div>
+
+        </li>
+
+
+
+
+        <li class="nav-item">
+
+          <a data-bs-toggle="collapse"
+            href="#salesOrder"
+            class="nav-link"
+            aria-controls="salesOrder"
+            role="button"
+            aria-expanded="false">
+
+            <i class="material-icons-round">fact_check</i>
+
+            <span class="nav-link-text ms-2 ps-1">
+              Sales Approval
+            </span>
+
+          </a>
+
+          <div class="collapse" id="salesOrder">
+
+            <ul class="nav">
+
+              <!-- APPROVAL IN -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('so/sales_order') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    1
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    sales orders
+                  </span>
+
+                </a>
+
+              </li>
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/approval_in?type=1') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    2
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval In
+                  </span>
+
+                </a>
+
+              </li>
+
+              <!-- APPROVAL OUT -->
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/approval_out?type=1') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    3
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval Out
+                  </span>
+
+                </a>
+
+              </li>
+
+
+
+
+
+            </ul>
+
+          </div>
+
+        </li>
+
+
+
+
         <li class="nav-item">
 
           <a data-bs-toggle="collapse"
@@ -256,7 +426,7 @@
             <i class="material-icons-round">fact_check</i>
 
             <span class="nav-link-text ms-2 ps-1">
-             Payment Approvals
+              Payment Approvals
             </span>
 
           </a>
@@ -266,17 +436,33 @@
             <ul class="nav">
 
               <!-- APPROVAL IN -->
-              <li class="nav-item">
+               <li class="nav-item">
 
                 <a class="nav-link"
-                  href="<?= base_url('Approval/payment_approval_in') ?>">
+                  href="<?= base_url('Approval/payments') ?>">
 
                   <span class="sidenav-mini-icon">
                     1
                   </span>
 
                   <span class="sidenav-normal ms-2 ps-1">
-                    Payment In
+                     Payments
+                  </span>
+
+                </a>
+
+              </li>
+              <li class="nav-item">
+
+                <a class="nav-link"
+                  href="<?= base_url('Approval/payment_approval_in') ?>">
+
+                  <span class="sidenav-mini-icon">
+                    2
+                  </span>
+
+                  <span class="sidenav-normal ms-2 ps-1">
+                   Approval Out
                   </span>
 
                 </a>
@@ -290,11 +476,11 @@
                   href="<?= base_url('Approval/payment_approval_out') ?>">
 
                   <span class="sidenav-mini-icon">
-                    2
+                    3
                   </span>
 
                   <span class="sidenav-normal ms-2 ps-1">
-                    Payment Out
+                    Approval Out
                   </span>
 
                 </a>
@@ -306,7 +492,7 @@
           </div>
 
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
 
           <a data-bs-toggle="collapse"
             href="#purchaseOrderApprovals"
@@ -327,11 +513,11 @@
 
             <ul class="nav">
 
-              <!-- APPROVAL IN -->
+            
               <li class="nav-item">
 
                 <a class="nav-link"
-                  href="<?= base_url('Approval/approval_in?type=0') ?>">
+                  href="</?= base_url('Approval/approval_in?type=0') ?>">
 
                   <span class="sidenav-mini-icon">
                     1
@@ -345,11 +531,11 @@
 
               </li>
 
-              <!-- APPROVAL OUT -->
+            
               <li class="nav-item">
 
                 <a class="nav-link"
-                  href="<?= base_url('Approval/approval_out?type=0') ?>">
+                  href="</?= base_url('Approval/approval_out?type=0') ?>">
 
                   <span class="sidenav-mini-icon">
                     2
@@ -367,69 +553,70 @@
 
           </div>
 
-        </li>
-        <li class="nav-item">
+        </li> -->
+        <!-- <li class="nav-item">
 
-    <a data-bs-toggle="collapse"
-       href="#salesOrderApprovals"
-       class="nav-link"
-       aria-controls="salesOrderApprovals"
-       role="button"
-       aria-expanded="false">
+          <a data-bs-toggle="collapse"
+            href="#salesOrderApprovals"
+            class="nav-link"
+            aria-controls="salesOrderApprovals"
+            role="button"
+            aria-expanded="false">
 
-        <i class="material-icons-round">fact_check</i>
+            <i class="material-icons-round">fact_check</i>
 
-        <span class="nav-link-text ms-2 ps-1">
-            Sales Order Approvals
-        </span>
+            <span class="nav-link-text ms-2 ps-1">
+              Sales Order Approvals
+            </span>
 
-    </a>
+          </a>
 
-    <div class="collapse" id="salesOrderApprovals">
+          <div class="collapse" id="salesOrderApprovals">
 
-        <ul class="nav">
+            <ul class="nav">
 
-            <!-- APPROVAL IN -->
-            <li class="nav-item">
+            
+              <li class="nav-item">
 
                 <a class="nav-link"
-                   href="<?= base_url('Approval/approval_in?type=1') ?>">
+                  href="</?= base_url('Approval/approval_in?type=1') ?>">
 
-                    <span class="sidenav-mini-icon">
-                        1
-                    </span>
+                  <span class="sidenav-mini-icon">
+                    1
+                  </span>
 
-                    <span class="sidenav-normal ms-2 ps-1">
-                        Approval In
-                    </span>
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval In
+                  </span>
 
                 </a>
 
-            </li>
+              </li>
 
-            <!-- APPROVAL OUT -->
-            <li class="nav-item">
+             
+              <li class="nav-item">
 
                 <a class="nav-link"
-                   href="<?= base_url('Approval/approval_out?type=1') ?>">
+                  href="</?= base_url('Approval/approval_out?type=1') ?>">
 
-                    <span class="sidenav-mini-icon">
-                        2
-                    </span>
+                  <span class="sidenav-mini-icon">
+                    2
+                  </span>
 
-                    <span class="sidenav-normal ms-2 ps-1">
-                        Approval Out
-                    </span>
+                  <span class="sidenav-normal ms-2 ps-1">
+                    Approval Out
+                  </span>
 
                 </a>
 
-            </li>
+              </li>
 
-        </ul>
+            </ul>
 
-    </div>
+          </div>
 
-</li>
+        </li> -->
+
         <!-- <li class="nav-item">
           <a data-bs-toggle="collapse" href="#componentsproj" class="nav-link " aria-controls="componentsExamples"
             role="button" aria-expanded="false">

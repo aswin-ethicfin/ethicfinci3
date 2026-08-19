@@ -13,7 +13,7 @@
 
                         <h6 class="text-white text-capitalize ps-3 mb-0">
 
-                          Payment Approval Out
+                            Payment Approval Out
                         </h6>
 
                     </div>
@@ -199,7 +199,7 @@
                                 </tr>
 
                             </thead>
- 
+
                             <tbody>
 
                                 <?php if (!empty($payments)): ?>
@@ -210,10 +210,10 @@
 
                                             <!-- Date -->
                                             <td>
-        <?= !empty($row['date'])
-            ? date('d-M-Y', strtotime($row['date']))
-            : '-' ?>
-    </td>
+                                                <?= !empty($row['date'])
+                                                    ? date('d-M-Y', strtotime($row['date']))
+                                                    : '-' ?>
+                                            </td>
 
 
 
@@ -226,7 +226,7 @@
 
                                             <!-- Vendor -->
                                             <td>
-                                                  <?= html_escape($row['profile_name'] ?? '-') ?>
+                                                <?= html_escape($row['profile_name'] ?? '-') ?>
                                             </td>
 
                                             <!-- Amount -->
@@ -299,7 +299,7 @@
                                                 <div class="d-flex justify-content-end gap-1">
 
                                                     <!-- Edit -->
-                                                    
+
 
                                                 </div>
 

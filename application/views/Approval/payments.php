@@ -12,7 +12,7 @@
                     <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
 
                         <h6 class="text-white text-capitalize ps-3 mb-0">
-                            Payment Approval
+                            Payments
                         </h6>
 
                     </div>
@@ -24,7 +24,7 @@
                 <div class="card-body px-4 pb-2">
 
                     <form method="get"
-                          class="mb-4 row g-3 align-items-end">
+                        class="mb-4 row g-3 align-items-end">
 
                         <!-- START DATE -->
                         <div class="col-md-2">
@@ -34,9 +34,9 @@
                             </label>
 
                             <input type="date"
-                                   name="start_date"
-                                   class="form-control border border-dark rounded"
-                                   value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>">
+                                name="start_date"
+                                class="form-control border border-dark rounded"
+                                value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>">
 
                         </div>
 
@@ -49,9 +49,9 @@
                             </label>
 
                             <input type="date"
-                                   name="end_date"
-                                   class="form-control border border-dark rounded"
-                                   value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>">
+                                name="end_date"
+                                class="form-control border border-dark rounded"
+                                value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>">
 
                         </div>
 
@@ -64,7 +64,7 @@
                             </label>
 
                             <select name="approval_status"
-                                    class="form-select border border-dark rounded">
+                                class="form-select border border-dark rounded">
 
                                 <option value="">
                                     All Status
@@ -111,10 +111,10 @@
                             </label>
 
                             <input type="text"
-                                   name="search"
-                                   class="form-control border border-dark rounded"
-                                   placeholder="Reference / Voucher / Payer"
-                                   value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                                name="search"
+                                class="form-control border border-dark rounded"
+                                placeholder="Reference / Voucher / Payer"
+                                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
 
                         </div>
 
@@ -123,14 +123,14 @@
                         <div class="col-md-2 d-flex gap-2">
 
                             <button type="submit"
-                                    class="btn btn-primary">
+                                class="btn btn-primary">
 
                                 <i class="fa fa-search"></i>
 
                             </button>
 
                             <a href="<?= base_url('approval/payment_approval_in') ?>"
-                               class="btn btn-secondary">
+                                class="btn btn-secondary">
 
                                 <i class="fa fa-sync-alt"></i>
 
@@ -147,33 +147,20 @@
                         <table class="table align-items-center mb-0">
 
                             <thead>
-
                                 <tr>
-
+                                    <th>#</th>
                                     <th>Date</th>
+                                    <th>Voucher No</th>
+                                    <th>Branch Name</th>
+                                    <th>Project</th>
+                                    <th>Customer Or Party</th>
+                                    <th>Description</th>
+                                    <th>Mode</th>
+                                    <th class="text-end">Amount</th>
+                                    <th>Status</th>
 
-                                    <th>Reference</th>
-
-                                    <th>Voucher No.</th>
-
-                                    <th>Receiver / Payer</th>
-
-                                    <th class="text-end">
-                                        Amount
-                                    </th>
-
-                                    <th>From</th>
-
-                                    <th class="text-center">
-                                        Status
-                                    </th>
-
-                                    <th class="text-end">
-                                        Operations
-                                    </th>
-
+                                    <th class="text-center">Operations</th>
                                 </tr>
-
                             </thead>
 
 
@@ -181,52 +168,75 @@
 
                                 <?php if (!empty($payments)): ?>
 
-                                    <?php foreach ($payments as $row): ?>
+                                    <?php foreach ($payments as $key => $row): ?>
 
                                         <tr>
 
+                                            <!-- # -->
+                                            <td>
+                                                <?= $key + 1 ?>
+                                            </td>
+
+
                                             <!-- DATE -->
                                             <td>
-
                                                 <?= !empty($row['date'])
-                                                    ? date(
-                                                        'd-M-Y',
-                                                        strtotime($row['date'])
-                                                    )
+                                                    ? date('d-m-Y', strtotime($row['date']))
                                                     : '-' ?>
-
                                             </td>
 
 
-                                            <!-- REFERENCE -->
+                                            <!-- VOUCHER NO -->
                                             <td>
-
                                                 <strong>
                                                     <?= htmlspecialchars(
-                                                        $row['reference'] ?? '-'
+                                                        $row['voucher_no'] ?? '-'
                                                     ) ?>
                                                 </strong>
-
                                             </td>
 
 
-                                            <!-- VOUCHER -->
+                                            <!-- BRANCH -->
                                             <td>
-
                                                 <?= htmlspecialchars(
-                                                    $row['voucher_no'] ?? '-'
+                                                    $row['branch_name'] ??
+                                                        $row['branch_id'] ??
+                                                        '-'
                                                 ) ?>
-
                                             </td>
 
 
-                                            <!-- RECEIVER / PAYER -->
+                                            <!-- PROJECT -->
                                             <td>
-
                                                 <?= htmlspecialchars(
-                                                    $row['receiver_payer'] ?? '-'
+                                                    $row['project_name'] ??
+                                                        $row['project_id'] ??
+                                                        '-'
                                                 ) ?>
+                                            </td>
 
+
+                                            <!-- CUSTOMER / PARTY -->
+                                            <td>
+                                                <?= htmlspecialchars(
+                                                    $row['customer_party'] ?? '-'
+                                                ) ?>
+                                            </td>
+
+
+                                            <!-- DESCRIPTION -->
+                                            <td>
+                                                <?= htmlspecialchars(
+                                                    $row['description'] ?? '-'
+                                                ) ?>
+                                            </td>
+
+
+                                            <!-- MODE -->
+                                            <td>
+                                                <?= htmlspecialchars(
+                                                    $row['mode_name'] ?? '-'
+                                                ) ?>
                                             </td>
 
 
@@ -240,138 +250,42 @@
 
                                             </td>
 
-
-                                            <!-- FROM -->
                                             <td>
+                                                <button type="button"
+                                                    class="badge bg-gradient-dark badge-sm border-0"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#paymentApprovalModal_<?= (int)$row['id'] ?>">
 
-                                                <?php if (
-                                                    (int)($row['transfer_from'] ?? 0) === 0
-                                                ): ?>
+                                                    <i class="fa fa-pencil"></i>
 
-                                                    <strong>
-                                                        Created
-                                                    </strong>
-
-                                                <?php else: ?>
-
-                                                    <strong>
-
-                                                        <?= htmlspecialchars(
-                                                            $row['employee_name'] ?? '-'
-                                                        ) ?>
-
-                                                    </strong>
-
-                                                    <br>
-
-                                                    <small class="text-secondary">
-
-                                                        <?= htmlspecialchars(
-                                                            $row['designation_name'] ?? '-'
-                                                        ) ?>
-
-                                                    </small>
-
-                                                <?php endif; ?>
+                                                </button>
 
                                             </td>
-
-
-                                            <!-- STATUS -->
-                                            <td class="text-center">
-
-                                                <?php
-
-                                                $approval_status =
-                                                    (int)($row['approval_status'] ?? 0);
-
-                                                switch ($approval_status) {
-
-                                                    case 0:
-
-                                                        $status_text = 'Pending';
-                                                        $status_class =
-                                                            'bg-gradient-warning';
-
-                                                        break;
-
-                                                    case 1:
-
-                                                        $status_text = 'Approved';
-                                                        $status_class =
-                                                            'bg-gradient-success';
-
-                                                        break;
-
-                                                    case 2:
-
-                                                        $status_text = 'Rejected';
-                                                        $status_class =
-                                                            'bg-gradient-danger';
-
-                                                        break;
-
-                                                    case 3:
-
-                                                        $status_text =
-                                                            'For Further Approval';
-
-                                                        $status_class =
-                                                            'bg-gradient-secondary';
-
-                                                        break;
-
-                                                    default:
-
-                                                        $status_text = 'Unknown';
-                                                        $status_class =
-                                                            'bg-gradient-dark';
-
-                                                        break;
-                                                }
-
-                                                ?>
-
-                                                <span class="badge <?= $status_class ?>">
-
-                                                    <?= $status_text ?>
-
-                                                </span>
-
-                                            </td>
-
 
                                             <!-- OPERATIONS -->
-                                            <td class="text-end">
+                                            <td>
+                                                <!-- View Payment -->
+                                                <a href="<?= base_url(
+                                                                'home/view_payment?ref=' .
+                                                                    urlencode($row['reference'] ?? '')
+                                                            ) ?>"
+                                                    class="badge badge-sm bg-gradient-info">
 
-                                                <div class="d-flex justify-content-end gap-1">
+                                                    View Payment
 
-
-                                                    <!-- APPROVAL BUTTON -->
-                                                    <button type="button"
-                                                            class="badge bg-gradient-dark badge-sm border-0"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#paymentApprovalModal_<?= (int)$row['id'] ?>">
-
-                                                        <i class="fa fa-pencil"></i>
-
-                                                    </button>
+                                                </a>
 
 
-                                                    <!-- VIEW PAYMENT -->
-                                                    <a href="<?= base_url(
-                                                        'approval/view_payment?reference=' .
-                                                        urlencode($row['reference'])
-                                                    ) ?>"
-                                                       class="badge bg-gradient-secondary badge-sm"
-                                                       title="View Payment">
+                                                <!-- View Transaction -->
+                                                <a href="<?= base_url(
+                                                                'home/view_trans?ref=' .
+                                                                    urlencode($row['reference'] ?? '')
+                                                            ) ?>"
+                                                    class="badge badge-sm bg-gradient-info">
 
-                                                        <i class="fa fa-eye"></i>
+                                                    View
 
-                                                    </a>
-
-                                                </div>
-
+                                                </a>
                                             </td>
 
                                         </tr>
@@ -383,13 +297,11 @@
 
                                     <tr>
 
-                                        <td colspan="8"
+                                        <td colspan="10"
                                             class="text-center py-4">
 
                                             <span class="text-secondary">
-
-                                                No payments found for approval.
-
+                                                No payments found.
                                             </span>
 
                                         </td>
@@ -422,17 +334,17 @@
         <?php foreach ($payments as $row): ?>
 
             <div class="modal fade"
-                 id="paymentApprovalModal_<?= (int)$row['id'] ?>"
-                 tabindex="-1"
-                 aria-hidden="true">
+                id="paymentApprovalModal_<?= (int)$row['id'] ?>"
+                tabindex="-1"
+                aria-hidden="true">
 
                 <div class="modal-dialog modal-md modal-dialog-centered">
 
                     <div class="modal-content">
 
                         <form method="post"
-                              action="<?= base_url('approval/payment_saveapproval') ?>"
-                              class="approval-form">
+                            action="<?= base_url('approval/payment_saveapproval') ?>"
+                            class="approval-form">
 
 
                             <!-- HEADER -->
@@ -443,8 +355,8 @@
                                 </h5>
 
                                 <button type="button"
-                                        class="btn-close"
-                                        data-bs-dismiss="modal">
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
                                 </button>
 
                             </div>
@@ -456,42 +368,42 @@
 
                                 <!-- APPROVAL ID -->
                                 <input type="hidden"
-                                       name="approval_id"
-                                       id="payment_approval_id"
-                                       value="<?= (int)$row['id'] ?>">
+                                    name="approval_id"
+                                    id="payment_approval_id"
+                                    value="<?= (int)$row['id'] ?>">
 
 
                                 <!-- DOCUMENT ID -->
                                 <input type="hidden"
-                                       name="doc_id"
-                                       id="payment_doc_id"
-                                       value="<?= htmlspecialchars(
-                                           $row['id'] ?? ''
-                                       ) ?>">
+                                    name="doc_id"
+                                    id="payment_doc_id"
+                                    value="<?= htmlspecialchars(
+                                                $row['id'] ?? ''
+                                            ) ?>">
 
 
                                 <!-- TYPE -->
                                 <input type="hidden"
-                                       name="type"
-                                       value="2">
+                                    name="type"
+                                    value="2">
 
 
                                 <!-- TRANSFER FROM -->
                                 <input type="hidden"
-                                       name="transfer_from"
-                                       id="payment_transfer_from"
-                                       value="<?= (int)(
-                                           $row['transfer_from'] ?? 0
-                                       ) ?>">
+                                    name="transfer_from"
+                                    id="payment_transfer_from"
+                                    value="<?= (int)(
+                                                $row['transfer_from'] ?? 0
+                                            ) ?>">
 
 
                                 <!-- TRANSFER TO -->
                                 <input type="hidden"
-                                       name="transfer_to"
-                                       id="payment_transfer_to"
-                                       value="<?= (int)(
-                                           $row['transfer_to'] ?? 0
-                                       ) ?>">
+                                    name="transfer_to"
+                                    id="payment_transfer_to"
+                                    value="<?= (int)(
+                                                $row['transfer_to'] ?? 0
+                                            ) ?>">
 
 
                                 <!-- PAYMENT INFORMATION -->
@@ -611,9 +523,9 @@
                                     </label>
 
                                     <input type="date"
-                                           name="approval_date"
-                                           class="form-control"
-                                           value="<?= date('Y-m-d') ?>">
+                                        name="approval_date"
+                                        class="form-control"
+                                        value="<?= date('Y-m-d') ?>">
 
                                 </div>
 
@@ -626,13 +538,13 @@
                                     </label>
 
                                     <select name="status"
-                                            class="form-select approval-status">
+                                        class="form-select approval-status">
 
                                         <option value="">
                                             Select Status
                                         </option>
 
-                                        <option value="0">
+                                        <!-- <option value="0">
                                             Pending
                                         </option>
 
@@ -642,7 +554,7 @@
 
                                         <option value="2">
                                             Rejected
-                                        </option>
+                                        </option> -->
 
                                         <option value="3">
                                             For Further Approval
@@ -655,7 +567,7 @@
 
                                 <!-- FURTHER APPROVAL -->
                                 <div class="further-approval-section mb-3"
-                                     style="display:none;">
+                                    style="display:none;">
 
                                     <div class="row">
 
@@ -668,7 +580,7 @@
                                             </label>
 
                                             <select name="designation_id"
-                                                    class="form-select approval-designation">
+                                                class="form-select approval-designation">
 
                                                 <option value="">
                                                     Select Designation
@@ -681,8 +593,8 @@
                                                     ): ?>
 
                                                         <option value="<?= html_escape(
-                                                            $desig['id']
-                                                        ) ?>">
+                                                                            $desig['id']
+                                                                        ) ?>">
 
                                                             <?= html_escape(
                                                                 $desig['name']
@@ -707,8 +619,8 @@
                                             </label>
 
                                             <select name="employee_id"
-                                                    class="form-select approval-employee"
-                                                    disabled>
+                                                class="form-select approval-employee"
+                                                disabled>
 
                                                 <option value="">
                                                     Select Employee
@@ -724,19 +636,7 @@
 
 
                                 <!-- DESCRIPTION -->
-                                <div class="mb-3">
-
-                                    <label class="form-label">
-                                        Description
-                                    </label>
-
-                                    <textarea class="form-control"
-                                              rows="2"
-                                              readonly><?= htmlspecialchars(
-                                                  $row['description'] ?? ''
-                                              ) ?></textarea>
-
-                                </div>
+                               
 
 
                                 <!-- REMARK -->
@@ -747,12 +647,12 @@
                                     </label>
 
                                     <textarea name="remarks"
-                                              class="form-control"
-                                              rows="3"><?= htmlspecialchars(
-                                                  $row['approval_remark']
-                                                      ?? $row['']
-                                                      ?? ''
-                                              ) ?></textarea>
+                                        class="form-control"
+                                        rows="3"><?= htmlspecialchars(
+                                                        $row['']
+                                                            ?? $row['']
+                                                            ?? ''
+                                                    ) ?></textarea>
 
                                 </div>
 
@@ -763,8 +663,8 @@
                             <div class="modal-footer py-2">
 
                                 <button type="button"
-                                        class="btn btn-secondary btn-sm"
-                                        data-bs-dismiss="modal">
+                                    class="btn btn-secondary btn-sm"
+                                    data-bs-dismiss="modal">
 
                                     CANCEL
 
@@ -772,7 +672,7 @@
 
 
                                 <button type="submit"
-                                        class="btn btn-primary btn-sm">
+                                    class="btn btn-primary btn-sm">
 
                                     CONFIRM
 
@@ -796,25 +696,25 @@
 
 
 <script>
-     function showFlashMessage(type, message) {
+    function showFlashMessage(type, message) {
 
-            let alertId = type + 'AlertDynamic';
+        let alertId = type + 'AlertDynamic';
 
-            $('#' + alertId).remove();
+        $('#' + alertId).remove();
 
-            let bg = type === 'success' ?
-                'linear-gradient(135deg, #28c76f, #20a85a)' :
-                'linear-gradient(135deg, #ea5455, #c53030)';
+        let bg = type === 'success' ?
+            'linear-gradient(135deg, #28c76f, #20a85a)' :
+            'linear-gradient(135deg, #ea5455, #c53030)';
 
-            let icon = type === 'success' ?
-                'fa-check-circle' :
-                'fa-times-circle';
+        let icon = type === 'success' ?
+            'fa-check-circle' :
+            'fa-times-circle';
 
-            let title = type === 'success' ?
-                'Success' :
-                'Error';
+        let title = type === 'success' ?
+            'Success' :
+            'Error';
 
-            let html = `
+        let html = `
         <div
             id="${alertId}"
             style="
@@ -881,16 +781,16 @@
         </div>
     `;
 
-            $('body').append(html);
+        $('body').append(html);
 
-            setTimeout(() => {
+        setTimeout(() => {
 
-                $('#' + alertId).fadeOut(500, function() {
-                    $(this).remove();
-                });
+            $('#' + alertId).fadeOut(500, function() {
+                $(this).remove();
+            });
 
-            }, 3000);
-        }
+        }, 3000);
+    }
 
     /*
      * Show / hide further approval
@@ -917,12 +817,12 @@
                 ).val('');
 
                 section.find(
-                    'select[name="employee_id"]'
-                )
-                .html(
-                    '<option value="">Select Employee</option>'
-                )
-                .prop('disabled', true);
+                        'select[name="employee_id"]'
+                    )
+                    .html(
+                        '<option value="">Select Employee</option>'
+                    )
+                    .prop('disabled', true);
 
             }
 
@@ -969,8 +869,8 @@
             $.ajax({
 
                 url: "<?= base_url(
-                    'approval/getemployeesbydesignation'
-                ) ?>",
+                            'approval/getemployeesbydesignation'
+                        ) ?>",
 
                 type: "GET",
 
@@ -1058,139 +958,160 @@
     /*
      * Form validation
      */
-   $(document).on(
-    'submit',
-    '.approval-form',
-    function(e) {
+    $(document).on(
+        'submit',
+        '.approval-form',
+        function(e) {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const form = $(this);
+            const form = $(this);
 
-        const status = form
-            .find('select[name="status"]')
-            .val();
-
-        /*
-         * Validate status
-         */
-        if (status === '') {
-
-            showFlashMessage(
-                'error',
-                'Please select an approval status.'
-            );
-
-            return false;
-        }
-
-
-        /*
-         * Validate further approval
-         */
-        if (status === '3') {
-
-            const designation = form
-                .find('select[name="designation_id"]')
+            const status = form
+                .find('select[name="status"]')
                 .val();
 
-            const employee = form
-                .find('select[name="employee_id"]')
-                .val();
-
-
-            if (!designation) {
+            /*
+             * Validate status
+             */
+            if (status === '') {
 
                 showFlashMessage(
                     'error',
-                    'Please select a designation.'
+                    'Please select an approval status.'
                 );
 
                 return false;
             }
 
 
-            if (!employee) {
+            /*
+             * Validate further approval
+             */
+            if (status === '3') {
 
-                showFlashMessage(
-                    'error',
-                    'Please select an employee for further approval.'
-                );
+                const designation = form
+                    .find('select[name="designation_id"]')
+                    .val();
 
-                return false;
-            }
-        }
-
-
-        /*
-         * AJAX SUBMIT
-         */
-        $.ajax({
-
-            url: form.attr('action'),
-
-            type: 'POST',
-
-            data: form.serialize(),
-
-            dataType: 'json',
-
-            beforeSend: function() {
-
-                form.find('button[type="submit"]')
-                    .prop('disabled', true)
-                    .text('PROCESSING...');
-            },
-
-            success: function(response) {
-
-                console.log(
-                    'Payment Approval Response:',
-                    response
-                );
+                const employee = form
+                    .find('select[name="employee_id"]')
+                    .val();
 
 
-                if (response.status === true) {
-
-                    showFlashMessage(
-                        'success',
-                        response.message ||
-                        'Payment approved successfully.'
-                    );
-
-
-                    /*
-                     * Close current modal
-                     */
-                    const modalElement =
-                        form.closest('.modal')[0];
-
-                    const modal =
-                        bootstrap.Modal.getInstance(
-                            modalElement
-                        );
-
-                    if (modal) {
-                        modal.hide();
-                    }
-
-
-                    /*
-                     * Reload after success
-                     */
-                    setTimeout(function() {
-
-                        location.reload();
-
-                    }, 800);
-
-
-                } else {
+                if (!designation) {
 
                     showFlashMessage(
                         'error',
-                        response.message ||
-                        'Payment approval failed.'
+                        'Please select a designation.'
+                    );
+
+                    return false;
+                }
+
+
+                if (!employee) {
+
+                    showFlashMessage(
+                        'error',
+                        'Please select an employee for further approval.'
+                    );
+
+                    return false;
+                }
+            }
+
+
+            /*
+             * AJAX SUBMIT
+             */
+            $.ajax({
+
+                url: form.attr('action'),
+
+                type: 'POST',
+
+                data: form.serialize(),
+
+                dataType: 'json',
+
+                beforeSend: function() {
+
+                    form.find('button[type="submit"]')
+                        .prop('disabled', true)
+                        .text('PROCESSING...');
+                },
+
+                success: function(response) {
+
+                    console.log(
+                        'Payment Approval Response:',
+                        response
+                    );
+
+
+                    if (response.status === true) {
+
+                        showFlashMessage(
+                            'success',
+                            response.message ||
+                            'Payment approved successfully.'
+                        );
+
+
+                        /*
+                         * Close current modal
+                         */
+                        const modalElement =
+                            form.closest('.modal')[0];
+
+                        const modal =
+                            bootstrap.Modal.getInstance(
+                                modalElement
+                            );
+
+                        if (modal) {
+                            modal.hide();
+                        }
+
+
+                        /*
+                         * Reload after success
+                         */
+                        setTimeout(function() {
+
+                            location.reload();
+
+                        }, 800);
+
+
+                    } else {
+
+                        showFlashMessage(
+                            'error',
+                            response.message ||
+                            'Payment approval failed.'
+                        );
+
+
+                        form.find('button[type="submit"]')
+                            .prop('disabled', false)
+                            .text('CONFIRM');
+                    }
+
+                },
+
+                error: function(xhr) {
+
+                    console.log(
+                        'Payment Approval AJAX ERROR:',
+                        xhr.responseText
+                    );
+
+
+                    showFlashMessage(
+                        'error',
+                        'Payment approval failed. Check console for details.'
                     );
 
 
@@ -1199,31 +1120,9 @@
                         .text('CONFIRM');
                 }
 
-            },
+            });
 
-            error: function(xhr) {
-
-                console.log(
-                    'Payment Approval AJAX ERROR:',
-                    xhr.responseText
-                );
-
-
-                showFlashMessage(
-                    'error',
-                    'Payment approval failed. Check console for details.'
-                );
-
-
-                form.find('button[type="submit"]')
-                    .prop('disabled', false)
-                    .text('CONFIRM');
-            }
-
-        });
-
-        return false;
-    }
-);
-
+            return false;
+        }
+    );
 </script>

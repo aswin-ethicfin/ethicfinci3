@@ -1,9 +1,3 @@
-<?php
-$orders = array_merge(
-    $purchase_orders ?? [],
-    $sales_orders ?? []
-);
-?>
 <div class="container-fluid py-4">
 
     <div class="row">
@@ -13,30 +7,86 @@ $orders = array_merge(
             <div class="card my-4">
 
                 <!-- Header -->
+                <!-- Header -->
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
 
-                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-3 pb-3">
 
-                        <h6 class="text-white text-capitalize ps-3 mb-0">
-                            <h6 class="text-white text-capitalize ps-3 mb-0">
+                        <div class="d-flex justify-content-between align-items-center px-3">
 
-                                <?php if ((int)$type === 0): ?>
-
-                                    Purchase Approval
-
-                                <?php elseif ((int)$type === 1): ?>
-
-                                    Sales Approval
-
-                                <?php endif; ?>
-
+                            <!-- Title -->
+                            <h6 class="text-white text-capitalize mb-0">
+                                Purchase Order
                             </h6>
 
-                        </h6>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex align-items-center">
+
+                                <!-- Import Excel -->
+                                <a class="btn btn-outline-white btn-sm mb-0 me-2"
+                                    style="display:none"
+                                    href="<?= base_url('home/importpurchaseorder') ?>">
+
+                                    Import Excel
+
+                                </a>
+
+
+                                <!-- Export Excel -->
+                                <a class="btn btn-outline-white btn-sm mb-0 me-2"
+                                    href="<?= base_url(
+                                                'Excelexport/porders?from=' .
+                                                    ($start_date ?? date('Y-m-01')) .
+                                                    '&to=' .
+                                                    ($end_date ?? date('Y-m-d')) .
+                                                    '&branch=1&q=' .
+                                                    urlencode($search ?? '')
+                                            ) ?>">
+
+                                    Export to Excel
+
+                                </a>
+
+
+                                <!-- Print / PDF -->
+                                <a class="btn btn-outline-white btn-sm mb-0 me-2"
+                                    target="_blank"
+                                    href="<?= base_url(
+                                                'home/porderspdf?p=P' .
+                                                    '&from=' .
+                                                    ($start_date ?? date('Y-m-01')) .
+                                                    '&to=' .
+                                                    ($end_date ?? date('Y-m-d')) .
+                                                    '&salesrep=All' .
+                                                    '&branch=1' .
+                                                    '&q=' .
+                                                    urlencode($search ?? '') .
+                                                    '&cust=All'
+                                            ) ?>">
+
+                                    Print / PDF [P]
+
+                                </a>
+
+
+                                <!-- New Purchase Order -->
+                                <a class="btn btn-outline-white btn-sm mb-0"
+                                    href="<?= base_url('home/createporder') ?>">
+
+                                    New Purchase Order
+
+                                </a>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
                 </div>
+
+
 
 
                 <!-- Filters -->
@@ -77,43 +127,7 @@ $orders = array_merge(
 
 
                         <!-- Status -->
-                        <div class="col-md-2">
 
-                            <label class="form-label fw-bold">
-                                Status
-                            </label>
-
-                            <select name="approval_status"
-                                class="form-select border border-dark rounded">
-
-                                <option value=""
-                                    <?= empty($approval_status) ? 'selected' : '' ?>>
-                                    All Status
-                                </option>
-
-                                <option value="waiting"
-                                    <?= ($approval_status === 'waiting') ? 'selected' : '' ?>>
-                                    Waiting
-                                </option>
-
-                                <option value="pending"
-                                    <?= ($approval_status === 'pending') ? 'selected' : '' ?>>
-                                    Pending
-                                </option>
-
-                                <option value="approved"
-                                    <?= ($approval_status === 'approved') ? 'selected' : '' ?>>
-                                    Approved
-                                </option>
-
-                                <option value="rejected"
-                                    <?= ($approval_status === 'rejected') ? 'selected' : '' ?>>
-                                    Rejected
-                                </option>
-
-                            </select>
-
-                        </div>
 
 
                         <!-- Search -->
@@ -127,7 +141,7 @@ $orders = array_merge(
                                 name="search"
                                 class="form-control border border-dark rounded"
                                 placeholder="Document No / Vendor"
-                                  value="<?= htmlspecialchars($search ?? '') ?>">
+                                value="<?= htmlspecialchars($search ?? '') ?>">
 
                         </div>
 
@@ -142,7 +156,7 @@ $orders = array_merge(
 
                             </button>
 
-                            <a href="<?= base_url('Approval/approval_in?type=0') ?>"
+                            <a href="<?= base_url('po/purchase_order') ?>"
                                 class="btn btn-secondary">
 
                                 <i class="fa fa-sync-alt"></i>
@@ -154,6 +168,7 @@ $orders = array_merge(
                     </form>
 
 
+
                     <!-- Table -->
                     <div class="table-responsive">
 
@@ -163,6 +178,7 @@ $orders = array_merge(
                                 <tr>
 
                                     <th>Date</th>
+                                    <th>Branch</th>
 
                                     <th>Doc. No.</th>
 
@@ -172,7 +188,7 @@ $orders = array_merge(
                                         Amount
                                     </th>
 
-                                    <th>From</th>
+
 
                                     <th class="text-center">
                                         Status
@@ -185,171 +201,111 @@ $orders = array_merge(
                                 </tr>
                             </thead>
 
-
+ 
                             <tbody>
+
 
                                 <?php if (!empty($orders)): ?>
 
                                     <?php foreach ($orders as $row): ?>
 
-                                        <tr>
+                                        <tr data-doc-id="<?= (int)$row['id'] ?>">
 
-                                            <!-- TYPE -->
-
-
-
-                                            <!-- DATE -->
                                             <td>
                                                 <?= !empty($row['inv_date'])
                                                     ? date('d-M-Y', strtotime($row['inv_date']))
                                                     : '-' ?>
                                             </td>
 
-
-                                            <!-- DOCUMENT NO -->
                                             <td>
-                                                <strong>
-                                                    <?= htmlspecialchars($row['reference'] ?? '-') ?>
-                                                </strong>
+                                                <?= htmlspecialchars($row['branch_name'] ?? '-') ?>
                                             </td>
 
-
-                                            <!-- VENDOR / CUSTOMER -->
                                             <td>
-                                                <?= htmlspecialchars($row['vendor_name'] ?? '-') ?>
+                                                <?= htmlspecialchars($row['inv_no'] ?? '-') ?>
                                             </td>
 
+                                            <td>
+                                                <?= htmlspecialchars($row['name'] ?? '-') ?>
+                                            </td>
 
-                                            <!-- AMOUNT -->
                                             <td class="text-end">
-
                                                 <?= number_format(
                                                     (float)($row['grand_total'] ?? 0),
                                                     2
                                                 ) ?>
-
-                                                SAR
-
                                             </td>
 
+                                            <td class="approval-status">
+                                                <div style="padding-left: 40px !important;">
+                                                    <button type="button"
+                                                        class="badge bg-gradient-dark badge-sm border-0"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#approvalModal_<?= (int)$row['id'] ?>">
 
-                                            <!-- FROM -->
-                                            <td>
+                                                        <i class="fa fa-pencil"></i>
 
-                                                <?php if ((int)($row['transfer_from'] ?? 0) === 0): ?>
+                                                    </button>
 
-                                                    <strong>Created</strong>
+                                                    <?php if ((int)$row['payment_status'] === 0): ?>
 
-                                                <?php else: ?>
+                                                        <span class="badge bg-warning ms-2">
+                                                            Pending
+                                                        </span>
 
-                                                    <strong>
-                                                        <?= htmlspecialchars(
-                                                            $row['employee_name'] ?? '-'
-                                                        ) ?>
-                                                    </strong>
+                                                    <?php elseif ((int)$row['payment_status'] === 1): ?>
 
-                                                    <br>
+                                                        <span class="badge bg-success ms-2">
+                                                            Approved
+                                                        </span>
 
-                                                    <small class="text-secondary">
-                                                        <?= htmlspecialchars(
-                                                            $row['designation_name'] ?? '-'
-                                                        ) ?>
-                                                    </small>
+                                                    <?php elseif ((int)$row['payment_status'] === 2): ?>
 
-                                                <?php endif; ?>
+                                                        <span class="badge bg-danger ms-2">
+                                                            Rejected
+                                                        </span>
 
-                                            </td>
+                                                    <?php elseif ((int)$row['payment_status'] === 3): ?>
 
-
-                                            <!-- STATUS -->
-                                            <td class="text-center">
-                                                <button type="button"
-                                                    class="badge bg-gradient-dark badge-sm border-0"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#approvalModal_<?= (int)$row['approval_id'] ?>">
-
-                                                    <i class="fa fa-pencil"></i>
-
-                                                </button>
-                                                <?php
-                                                $approval_status = (int)($row['approval_status'] ?? 0);
-
-                                                switch ($approval_status) {
-
-                                                    case 0:
-                                                        $status_text = 'Pending';
-                                                        $status_class = 'bg-gradient-warning';
-                                                        break;
-
-                                                    case 1:
-                                                        $status_text = 'Approved';
-                                                        $status_class = 'bg-gradient-success';
-                                                        break;
-
-                                                    case 2:
-                                                        $status_text = 'Rejected';
-                                                        $status_class = 'bg-gradient-danger';
-                                                        break;
-
-                                                    case 3:
-                                                        $status_text = 'Waiting';
-                                                        $status_class = 'bg-gradient-secondary';
-                                                        break;
-
-                                                    default:
-                                                        $status_text = 'Unknown';
-                                                        $status_class = 'bg-gradient-dark';
-                                                        break;
-                                                }
-                                                ?>
-
-                                                <span class="badge <?= $status_class ?>">
-                                                    <?= $status_text ?>
-                                                </span>
-
-                                            </td>
-
-
-                                            <!-- OPERATIONS -->
-                                            <td class="text-end">
-
-                                                <div class="d-flex justify-content-end gap-1">
-
-                                                    <!-- EDIT / APPROVAL -->
-
-
-
-                                                    <!-- VIEW -->
-                                                    <?php if ((int)$row['type'] === 0): ?>
-
-                                                        <!-- PURCHASE -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewpurorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Purchase Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php elseif ((int)$row['type'] === 1): ?>
-
-                                                        <!-- SALES -->
-                                                        <a href="<?= base_url(
-                                                                        'home/viewsalesorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Sales Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
+                                                        <span class="badge bg-info">
+                                                            Further Approval
+                                                        </span>
 
                                                     <?php endif; ?>
 
                                                 </div>
 
+
+                                            </td>
+
+                                            <td class="text-end">
+
+
+
+                                                <a href="<?= base_url(
+                                                                'home/viewpurorder?order=' . $row['id']
+                                                            ) ?>"
+                                                    class="badge badge-sm bg-gradient-info">
+
+                                                    <i class="fa fa-eye"></i>
+
+                                                </a>
+
+                                                <a href="<?= base_url(
+                                                                'home/editporder?ref=' . $row['reference']
+                                                            ) ?>"
+                                                    class="badge badge-sm bg-gradient-secondary">
+
+                                                    <i class="fa fa-edit"></i>
+
+                                                </a>
+                                                <button type="button"
+                                                    class="badge badge-sm bg-gradient-danger border-0 delete-porder-btn"
+                                                    data-id="<?= (int)$row['id'] ?>">
+
+                                                    <i class="fa fa-trash"></i>
+
+                                                </button>
                                             </td>
 
                                         </tr>
@@ -359,18 +315,14 @@ $orders = array_merge(
                                 <?php else: ?>
 
                                     <tr>
-
-                                        <td colspan="8" class="text-center py-4">
-
-                                            <span class="text-secondary">
-                                                No orders found for approval.
-                                            </span>
-
+                                        <td colspan="7" class="text-center">
+                                            No Purchase Orders found.
                                         </td>
-
                                     </tr>
 
                                 <?php endif; ?>
+
+
 
                             </tbody>
 
@@ -380,12 +332,14 @@ $orders = array_merge(
             </div>
         </div>
     </div>
+
+
     <?php if (!empty($orders)): ?>
 
         <?php foreach ($orders as $row): ?>
 
             <div class="modal fade"
-                id="approvalModal_<?= (int)$row['approval_id'] ?>"
+                id="approvalModal_<?= (int)$row['id'] ?>"
                 tabindex="-1"
                 aria-hidden="true">
 
@@ -397,7 +351,7 @@ $orders = array_merge(
                     <div class="modal-content">
 
                         <form method="post"
-                            action="<?= base_url('approval/saveapproval') ?>" class="approval-form">
+                            action="<?= base_url('po/savePurchaseOrderApproval') ?>" class="approval-form">
 
                             <div class="modal-header py-2">
 
@@ -419,8 +373,11 @@ $orders = array_merge(
                                 <input type="hidden"
                                     name="approval_id"
                                     value="<?= (int)$row['approval_id'] ?>">
+                                <input type="hidden"
+                                    name="reference"
+                                    value="<?= (int)$row['reference'] ?>">
 
-
+                                <input type="hidden" name="from_page" value="order_listing">
                                 <!-- DOCUMENT ID -->
                                 <input type="hidden"
                                     name="doc_id"
@@ -430,7 +387,7 @@ $orders = array_merge(
                                 <!-- TYPE -->
                                 <input type="hidden"
                                     name="type"
-                                    value="<?= (int)($row['type'] ?? 0) ?>">
+                                    value="0">
 
 
                                 <!-- CURRENT TRANSFER FROM -->
@@ -438,8 +395,6 @@ $orders = array_merge(
                                     name="transfer_from"
                                     value="<?= (int)($row['transfer_from'] ?? 0) ?>">
 
-
-                                <!-- CURRENT TRANSFER TO -->
                                 <input type="hidden"
                                     name="transfer_to"
                                     value="<?= (int)($row['transfer_to'] ?? 0) ?>">
@@ -552,26 +507,26 @@ $orders = array_merge(
                                             Select Status
                                         </option>
 
-                                        <option value="0"
-                                            <?= (int)($row['approval_status'] ?? 0) === 0
+                                        <!-- <option value="0"
+                                            <//?= (int)($row['approval_status'] ?? 0) === 0
                                                 ? 'selected'
                                                 : '' ?>>
                                             Pending
                                         </option>
 
                                         <option value="1"
-                                            <?= (int)($row['approval_status'] ?? 0) === 1
+                                            </?= (int)($row['approval_status'] ?? 0) === 1
                                                 ? 'selected'
                                                 : '' ?>>
                                             Approved
                                         </option>
 
                                         <option value="2"
-                                            <?= (int)($row['approval_status'] ?? 0) === 2
+                                            </?= (int)($row['approval_status'] ?? 0) === 2
                                                 ? 'selected'
                                                 : '' ?>>
                                             Rejected
-                                        </option>
+                                        </option> -->
 
                                         <option value="3"
                                             <?= (int)($row['approval_status'] ?? 0) === 3
@@ -662,7 +617,7 @@ $orders = array_merge(
                                     <textarea name="remarks"
                                         class="form-control"
                                         rows="3"><?= htmlspecialchars(
-                                                        $row[' '] ?? ''
+                                                        $row[''] ?? ''
                                                     ) ?></textarea>
 
                                 </div>
@@ -702,6 +657,68 @@ $orders = array_merge(
 
     <?php endif; ?>
 
+    <div class="modal fade"
+        id="deletePorderModal"
+        tabindex="-1"
+        aria-labelledby="deletePorderModalLabel"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="deletePorderModalLabel">
+                        Delete Purchase Order
+                    </h5>
+
+                    <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <p class="mb-0">
+                        Are you sure you want to delete this Purchase Order?
+                    </p>
+
+                    <input type="hidden"
+                        id="deletePorderId"
+                        value="">
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="button"
+                        class="btn btn-danger"
+                        id="confirmDeletePorder">
+
+                        <i class="fa fa-trash me-1"></i>
+                        Delete
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <script>
         // =--------------------------------form validation & message---------------------------------
@@ -800,26 +817,35 @@ $orders = array_merge(
 
             }, 3000);
         }
+
+
         $(document).on('submit', '.approval-form', function(e) {
+
+            e.preventDefault();
 
             const form = $(this);
 
             const status = form.find('select[name="status"]').val();
 
-            // STATUS VALIDATION
-            if (status === '') {
+            // -----------------------------
+            // VALIDATION
+            // -----------------------------
 
-                e.preventDefault();
+            if (status === '' || status === null) {
 
                 showFlashMessage(
                     'error',
                     'Please select an approval status.'
                 );
 
-                return false;
+                return;
             }
 
-            // FURTHER APPROVAL VALIDATION
+
+            // -----------------------------
+            // FURTHER APPROVAL
+            // -----------------------------
+
             if (status === '3') {
 
                 const designation = form
@@ -832,37 +858,233 @@ $orders = array_merge(
 
                 if (!designation) {
 
-                    e.preventDefault();
-
                     showFlashMessage(
                         'error',
                         'Please select a designation.'
                     );
 
-                    return false;
+                    return;
                 }
 
                 if (!employee) {
-
-                    e.preventDefault();
 
                     showFlashMessage(
                         'error',
                         'Please select an employee for further approval.'
                     );
 
-                    return false;
+                    return;
                 }
             }
 
-            // APPROVED
+
+            // -----------------------------
+            // AJAX
+            // -----------------------------
+
+            $.ajax({
+
+                url: form.attr('action'),
+
+                type: 'POST',
+
+                data: form.serialize(),
+
+                dataType: 'json',
+
+                beforeSend: function() {
+
+                    form.find('button[type="submit"]')
+                        .prop('disabled', true)
+                        .text('Saving...');
+                },
+
+                success: function(response) {
+
+                    console.log('Purchase Order Approval Response:', response);
+
+                    if (response.status === true) {
+
+                        const docId = response.data.doc_id;
+
+                        const savedStatus = parseInt(
+                            response.data.status,
+                            10
+                        );
 
 
-            // Everything is valid
-            return true;
+                        // -----------------------------
+                        // CLOSE MODAL
+                        // -----------------------------
+
+                        const modalElement =
+                            form.closest('.modal')[0];
+
+                        if (modalElement) {
+
+                            const modalInstance =
+                                bootstrap.Modal.getInstance(modalElement);
+
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        }
+
+
+                        // -----------------------------
+                        // SUCCESS MESSAGE
+                        // -----------------------------
+
+                        showFlashMessage(
+                            'success',
+                            response.message
+                        );
+
+
+                        // -----------------------------
+                        // UPDATE ROW
+                        // -----------------------------
+
+                        updatePurchaseOrderRow(
+                            docId,
+                            savedStatus
+                        );
+
+
+                        // -----------------------------
+                        // RELOAD
+                        // -----------------------------
+
+                        setTimeout(function() {
+
+                            location.reload();
+
+                        }, 500);
+
+
+                    } else {
+
+                        showFlashMessage(
+                            'error',
+                            response.message ||
+                            'Failed to save Purchase Order approval.'
+                        );
+                    }
+                },
+
+
+                // -----------------------------
+                // AJAX ERROR
+                // -----------------------------
+
+                error: function(xhr) {
+
+                    console.error(
+                        '========== PURCHASE ORDER APPROVAL AJAX ERROR =========='
+                    );
+
+                    console.error(
+                        'HTTP Status:',
+                        xhr.status
+                    );
+
+                    console.error(
+                        'Status Text:',
+                        xhr.statusText
+                    );
+
+                    console.error(
+                        'Response:',
+                        xhr.responseText
+                    );
+
+                    let message =
+                        'Unable to save Purchase Order approval.';
+
+                    try {
+
+                        const response =
+                            JSON.parse(xhr.responseText);
+
+                        if (response.message) {
+
+                            message = response.message;
+                        }
+
+                        if (response.error) {
+
+                            console.error(
+                                'Server Error:',
+                                response.error
+                            );
+                        }
+
+                    } catch (e) {
+
+                        console.error(
+                            'Response is not JSON.'
+                        );
+                    }
+
+
+                    showFlashMessage(
+                        'error',
+                        message
+                    );
+                },
+
+
+                // -----------------------------
+                // COMPLETE
+                // -----------------------------
+
+                complete: function() {
+
+                    form.find('button[type="submit"]')
+                        .prop('disabled', false)
+                        .text('Save');
+                }
+            });
+
         });
 
 
+
+        function updatePurchaseOrderRow(docId, status) {
+
+            const row = $('tr[data-doc-id="' + docId + '"]');
+
+            console.log('PO row:', row);
+            console.log('Doc ID:', docId);
+            console.log('Status:', status);
+
+            if (!row.length) {
+                console.warn('Purchase Order row not found for ID:', docId);
+                return;
+            }
+
+            let statusText = '';
+
+            switch (status) {
+                case 0:
+                    statusText = 'Pending';
+                    break;
+
+                case 1:
+                    statusText = 'Approved';
+                    break;
+
+                case 2:
+                    statusText = 'Rejected';
+                    break;
+
+                case 3:
+                    statusText = 'Further Approval';
+                    break;
+            }
+
+            row.find('.approval-status').text(statusText);
+        }
         <?php
         $successMessage = $this->session->flashdata('success');
         $errorMessage   = $this->session->flashdata('error');
@@ -1007,6 +1229,191 @@ $orders = array_merge(
                         .html('<option value="">Error loading employees</option>')
                         .prop('disabled', true);
 
+                }
+
+            });
+
+        });
+
+
+
+        // delete
+        $(document).on('click', '.delete-porder-btn', function() {
+
+            const id = $(this).data('id');
+
+            console.log('Delete Purchase Order ID:', id);
+
+            $('#deletePorderId').val(id);
+
+            const modalElement =
+                document.getElementById('deletePorderModal');
+
+            const modal =
+                new bootstrap.Modal(modalElement);
+
+            modal.show();
+        });
+        $(document).on('click', '#confirmDeletePorder', function() {
+
+            const button = $(this);
+
+            const id = $('#deletePorderId').val();
+
+            if (!id) {
+
+                showFlashMessage(
+                    'error',
+                    'Purchase Order ID is missing.'
+                );
+
+                return;
+            }
+
+
+            console.log(
+                'Deleting Purchase Order:',
+                id
+            );
+
+
+            $.ajax({
+
+                url: '<?= base_url('Update/deleteporder') ?>',
+
+                type: 'POST',
+
+                data: {
+                    id: id
+                },
+
+                dataType: 'json',
+
+                beforeSend: function() {
+
+                    button
+                        .prop('disabled', true)
+                        .html(
+                            '<i class="fa fa-spinner fa-spin me-1"></i> Deleting...'
+                        );
+                },
+
+                success: function(response) {
+
+                    console.log(
+                        'Delete Purchase Order Response:',
+                        response
+                    );
+
+
+                   if (response.success === true) {
+
+                        /*
+                        | Close modal
+                        */
+
+                        const modalElement =
+                            document.getElementById(
+                                'deletePorderModal'
+                            );
+
+                        const modal =
+                            bootstrap.Modal.getInstance(
+                                modalElement
+                            );
+
+                        if (modal) {
+                            modal.hide();
+                        }
+
+
+                        /*
+                        | Success message
+                        */
+
+                        showFlashMessage(
+                            'success',
+                            response.message ||
+                            'Purchase Order deleted successfully.'
+                        );
+
+
+                        /*
+                        | Reload list
+                        */
+
+                        setTimeout(function() {
+
+                            location.reload();
+
+                        }, 500);
+
+
+                    } else {
+
+                        showFlashMessage(
+                            'error',
+                            response.message ||
+                            'Unable to delete Purchase Order.'
+                        );
+                    }
+                },
+
+
+                error: function(xhr) {
+
+                    console.error(
+                        '========== DELETE PURCHASE ORDER ERROR =========='
+                    );
+
+                    console.error(
+                        'HTTP Status:',
+                        xhr.status
+                    );
+
+                    console.error(
+                        'Response:',
+                        xhr.responseText
+                    );
+
+
+                    let message =
+                        'Unable to delete Purchase Order.';
+
+
+                    try {
+
+                        const response =
+                            JSON.parse(xhr.responseText);
+
+                        if (response.message) {
+
+                            message =
+                                response.message;
+                        }
+
+                    } catch (e) {
+
+                        console.error(
+                            'Response is not JSON.'
+                        );
+                    }
+
+
+                    showFlashMessage(
+                        'error',
+                        message
+                    );
+                },
+
+
+                complete: function() {
+
+                    button
+                        .prop('disabled', false)
+                        .html(
+                            '<i class="fa fa-trash me-1"></i> Delete'
+                        );
                 }
 
             });

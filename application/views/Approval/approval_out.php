@@ -44,7 +44,8 @@
 
                             <input type="date"
                                 name="start_date"
-                                class="form-control border border-dark rounded">
+                                class="form-control border border-dark rounded"
+                                value="<?= htmlspecialchars($start_date ?? date('Y-m-01')) ?>">
 
                         </div>
 
@@ -58,40 +59,12 @@
 
                             <input type="date"
                                 name="end_date"
-                                class="form-control border border-dark rounded">
+                                class="form-control border border-dark rounded"
+                                value="<?= htmlspecialchars($end_date ?? date('Y-m-d')) ?>">
 
                         </div>
 
 
-                        <!-- Document Type -->
-                        <div class="col-md-2">
-
-                            <label class="form-label fw-bold">
-                                Document Type
-                            </label>
-
-                            <select name="type"
-                                class="form-select border border-dark rounded">
-
-                                <option value="">
-                                    All Documents
-                                </option>
-
-                                <option value="0">
-                                    Purchase Order
-                                </option>
-
-                                <option value="1">
-                                    Sales Order
-                                </option>
-
-                                <option value="2">
-                                    Payment
-                                </option>
-
-                            </select>
-
-                        </div>
 
 
                         <!-- Status -->
@@ -104,23 +77,28 @@
                             <select name="approval_status"
                                 class="form-select border border-dark rounded">
 
-                                <option value="">
+                                <option value=""
+                                    <?= empty($approval_status) ? 'selected' : '' ?>>
                                     All Status
                                 </option>
 
-                                <option value="waiting">
+                                <option value="waiting"
+                                    <?= ($approval_status === 'waiting') ? 'selected' : '' ?>>
                                     Waiting
                                 </option>
 
-                                <option value="pending">
+                                <option value="pending"
+                                    <?= ($approval_status === 'pending') ? 'selected' : '' ?>>
                                     Pending
                                 </option>
 
-                                <option value="approved">
+                                <option value="approved"
+                                    <?= ($approval_status === 'approved') ? 'selected' : '' ?>>
                                     Approved
                                 </option>
 
-                                <option value="rejected">
+                                <option value="rejected"
+                                    <?= ($approval_status === 'rejected') ? 'selected' : '' ?>>
                                     Rejected
                                 </option>
 
@@ -139,7 +117,8 @@
                             <input type="text"
                                 name="search"
                                 class="form-control border border-dark rounded"
-                                placeholder="Document No / Vendor">
+                                placeholder="Document No / Vendor"
+                                  value="<?= htmlspecialchars($search ?? '') ?>">
 
                         </div>
 
@@ -154,7 +133,7 @@
 
                             </button>
 
-                            <a href="<?= base_url('Approval/approval_out?type=' . (int)$type) ?>"
+                            <a href="<?= base_url('Approval/approval_in?type=0') ?>"
                                 class="btn btn-secondary">
 
                                 <i class="fa fa-sync-alt"></i>
@@ -164,6 +143,7 @@
                         </div>
 
                     </form>
+
 
 
                     <!-- Table -->
@@ -309,55 +289,37 @@
                                                 <div class="d-flex justify-content-end gap-1">
 
                                                     <!-- Edit -->
-                                                    <?php if ((int)$row['type'] === 0): ?>
+                                                    <a href="<?= base_url(
+                                                                'home/viewpurorder?order=' . $row['id']
+                                                            ) ?>"
+                                                    class="badge badge-sm bg-gradient-info">
 
-                                                        <a href="<?= base_url(
-                                                                        'home/viewpurorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Purchase Order">
+                                                    <i class="fa fa-eye"></i>
 
-                                                            <i class="fa fa-eye"></i>
+                                                </a>
 
-                                                        </a>
-
-                                                    <?php elseif ((int)$row['type'] === 1): ?>
-
-                                                        <a href="<?= base_url(
-                                                                        'home/viewsalesorder?order=' . (int)$row['doc_id']
-                                                                    ) ?>"
-                                                            class="badge bg-gradient-secondary badge-sm"
-                                                            title="View Sales Order">
-
-                                                            <i class="fa fa-eye"></i>
-
-                                                        </a>
-
-                                                    <?php endif; ?>
-
-                                                </div>
-
-                                            </td>
-
-                                        </tr>
-
-                                    <?php endforeach; ?>
-
-                                <?php else: ?>
-
-                                    <tr>
-                                        <td colspan="8" class="text-center">
-                                            No purchase orders sent for approval.
-                                        </td>
-                                    </tr>
-
-                                <?php endif; ?>
-
-                            </tbody>
-
-                        </table>
 
                     </div>
+
+                    </td>
+
+                    </tr>
+
+                <?php endforeach; ?>
+
+            <?php else: ?>
+
+                <tr>
+                    <td colspan="8" class="text-center">
+                        No purchase orders sent for approval.
+                    </td>
+                </tr>
+
+            <?php endif; ?>
+
+            </tbody>
+
+            </table>
 
                 </div>
 
@@ -366,5 +328,7 @@
         </div>
 
     </div>
+
+</div>
 
 </div>

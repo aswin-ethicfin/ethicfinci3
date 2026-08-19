@@ -26,6 +26,7 @@ class Approval extends CI_Controller
         $this->load->view('template/last', $data);
     }
 
+
     private function updateDocumentApprovalStatus($type, $doc_id, $approval_status)
     {
         $table = '';
@@ -33,7 +34,7 @@ class Approval extends CI_Controller
         if ((int)$type === 0) {
 
 
-            $table = 'tbl_purchase_order';
+            $table = 'tbl_porder';
         } elseif ((int)$type === 1) {
 
 
@@ -76,6 +77,17 @@ class Approval extends CI_Controller
 
         return true;
     }
+    private function ajaxResponse($status, $message, $data = [])
+    {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status'  => $status,
+                'message' => $message,
+                'data'    => $data
+            ]));
+    }
+
     public function approval_in()
     {
         $sdata['approval_window'] = 'active bg-gradient-';
@@ -86,6 +98,7 @@ class Approval extends CI_Controller
         $ndata['title'] = 'Document Approval';
 
         $rdata['pagetitle'] = 'Document Approval';
+
 
         // Get type from URL
         // 0 = Purchase
@@ -106,7 +119,7 @@ class Approval extends CI_Controller
         if ($type === 0) {
 
             // Purchase Order
-            $order_table = 'tbl_purchase_order po';
+            $order_table = 'tbl_porder po';
         } elseif ($type === 1) {
 
             // Sales Order
@@ -256,7 +269,7 @@ class Approval extends CI_Controller
         if ($type === 0) {
 
             // Purchase Order
-            $order_table = 'tbl_purchase_order po';
+            $order_table = 'tbl_porder po';
         } elseif ($type === 1) {
 
             // Sales Order
@@ -453,8 +466,11 @@ class Approval extends CI_Controller
         ]);
     }
 
+
+
     public function saveapproval()
     {
+        log_message('error', '========== SAVEAPPROVAL START ==========');
         $this->load->library('PHPMailer_Library');
         $profile_id = 1; // replace with session user id
         // $type = (int)$current['type'];
@@ -465,6 +481,16 @@ class Approval extends CI_Controller
         $approval_date = $this->input->post('approval_date');
         $type = (int)$this->input->post('type');
         $employee_id = $this->input->post('employee_id');
+        $from_page = $this->input->post('from_page');
+
+        log_message('error', '========== POST VALUES ==========');
+        log_message('error', 'doc_id = ' . $doc_id);
+        log_message('error', 'approval_id = ' . $approval_id);
+        log_message('error', 'status RAW = ' . print_r($status, true));
+        log_message('error', 'status INT = ' . (int)$status);
+        log_message('error', 'type = ' . $type);
+        log_message('error', 'employee_id = ' . $employee_id);
+        log_message('error', 'from_page = ' . $from_page);
 
         /*
         |--------------------------------------------------------------------------
@@ -483,7 +509,25 @@ class Approval extends CI_Controller
             return;
         }
 
-        if (empty($approval_id)) {
+        log_message('error', '========== BEFORE APPROVAL ID VALIDATION ==========');
+        log_message('error', 'approval_id = ' . $approval_id);
+        log_message('error', 'status = ' . (int)$status);
+        if (empty($approval_id) && (int)$status !== 3) {
+
+            log_message(
+                'error',
+                'STOPPED: approval_id is empty'
+            );
+
+            if ($from_page === 'order_listing') {
+
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Approval ID is missing.'
+                ]);
+
+                return;
+            }
 
             $this->session->set_flashdata(
                 'error',
@@ -664,11 +708,7 @@ class Approval extends CI_Controller
                 redirect('approval/approval_in?type=' . $type);
                 return;
             }
-            /*
-|--------------------------------------------------------------------------
-| SEND APPROVAL EMAIL
-|--------------------------------------------------------------------------
-*/
+
 
             if (!empty($employee_email)) {
 
@@ -860,7 +900,7 @@ class Approval extends CI_Controller
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
-
+            log_message("new dataaaaaaaaa", $newData);
             $new_id = $this->Approval_model->insert_to_tb(
                 'tbl_document_approval',
                 $newData
@@ -913,9 +953,19 @@ class Approval extends CI_Controller
         */
 
         if ((int)$status === 3) {
+            log_message('error', 'doc_id: ' . $doc_id);
+            log_message('error', 'approval_id: ' . $approval_id);
+            log_message('error', 'type: ' . $type);
+            log_message('error', 'employee_id: ' . $employee_id);
+            log_message('error', 'from_page: ' . $from_page);
+            log_message('error', 'transfer_from CURRENT VALUE: ' . $transfer_from);
+            log_message('error', 'transfer_to CURRENT VALUE: ' . $transfer_to);
 
             if (empty($employee_id)) {
-
+                log_message(
+                    'error',
+                    'STATUS 3 FAILED: employee_id is empty'
+                );
                 $this->session->set_flashdata(
                     'error',
                     'Please select employee for further approval.'
@@ -939,7 +989,7 @@ class Approval extends CI_Controller
                 'transfer_to' => (int)$employee_id,
 
 
-                'approval_status' => 0,
+                'approval_status' => 3,
 
                 'remark' => !empty($remarks)
                     ? $remarks
@@ -959,11 +1009,44 @@ class Approval extends CI_Controller
 
                 'created_at' => date('Y-m-d H:i:s')
             ];
+            log_message(
+                'error',
+                '========== NEW APPROVAL DATA =========='
+            );
 
+            log_message(
+                'error',
+                print_r($newData, true)
+            );
+            log_message(
+                'error',
+                'STEP 1: BEFORE tbl_document_approval INSERT'
+            );
 
             $new_id = $this->Approval_model->insert_to_tb(
                 'tbl_document_approval',
                 $newData
+            );
+            log_message(
+                'error',
+                'STEP 2: AFTER tbl_document_approval INSERT'
+            );
+
+            log_message(
+                'error',
+                'NEW ID: ' . print_r($new_id, true)
+            );
+
+            log_message(
+                'error',
+                'DB ERROR AFTER INSERT: ' .
+                    print_r($this->db->error(), true)
+            );
+
+            log_message(
+                'error',
+                'LAST QUERY AFTER INSERT: ' .
+                    $this->db->last_query()
             );
             // DOCUMENT STATUS = FURTHER APPROVAL / WAITING
             $updated = $this->updateDocumentApprovalStatus(
@@ -999,11 +1082,7 @@ class Approval extends CI_Controller
                 redirect('approval/approval_in?type=' . $type);
                 return;
             }
-            /*
-|--------------------------------------------------------------------------
-| SEND FURTHER APPROVAL EMAIL
-|--------------------------------------------------------------------------
-*/
+
 
             $nextEmployee = $this->Approval_model->get_specific_columns(
                 'tbl_employee',
@@ -1021,96 +1100,100 @@ class Approval extends CI_Controller
                 ? $nextEmployee[0]['email']
                 : '';
 
-            if (!empty($nextEmployeeEmail)) {
+            // if (!empty($nextEmployeeEmail)) {
 
-                if ($type === 0) {
-                    $documentType = 'Purchase Order';
-                } elseif ($type === 1) {
-                    $documentType = 'Sales Order';
-                } else {
-                    $documentType = 'Document';
-                }
+            //     if ($type === 0) {
+            //         $documentType = 'Purchase Order';
+            //     } elseif ($type === 1) {
+            //         $documentType = 'Sales Order';
+            //     } else {
+            //         $documentType = 'Document';
+            //     }
 
-                $subject = $documentType . ' - Further Approval Required';
+            //     $subject = $documentType . ' - Further Approval Required';
 
-                $body = '
-        <h3>Further Approval Required</h3>
+            //     $body = '
+            //             <h3>Further Approval Required</h3>
 
-        <p>Hello ' . htmlspecialchars($nextEmployeeName) . ',</p>
+            //             <p>Hello ' . htmlspecialchars($nextEmployeeName) . ',</p>
 
-        <p>
-            A ' . htmlspecialchars($documentType) . '
-            has been forwarded to you for approval.
-        </p>
+            //             <p>
+            //                 A ' . htmlspecialchars($documentType) . '
+            //                 has been forwarded to you for approval.
+            //             </p>
 
-        <p>
-            <strong>Document ID:</strong> ' . $doc_id . '<br>
-            <strong>Status:</strong> Waiting for Approval<br>
-            <strong>Remarks:</strong> ' .
-                    htmlspecialchars(
-                        !empty($remarks)
-                            ? $remarks
-                            : 'Forwarded for further approval'
-                    ) . '
-        </p>
+            //             <p>
+            //                 <strong>Document ID:</strong> ' . $doc_id . '<br>
+            //                 <strong>Status:</strong> Waiting for Approval<br>
+            //                 <strong>Remarks:</strong> ' .
+            //                         htmlspecialchars(
+            //                             !empty($remarks)
+            //                                 ? $remarks
+            //                                 : 'Forwarded for further approval'
+            //                         ) . '
+            //             </p>
 
-        <p>
-            Please login to the ERP system and review the document.
-        </p>
+            //             <p>
+            //                 Please login to the ERP system and review the document.
+            //             </p>
 
-        <p>
-            Regards,<br>
-            Ethicfin ERP
-        </p>
-    ';
+            //             <p>
+            //                 Regards,<br>
+            //                 Ethicfin ERP
+            //             </p>
+            //         ';
 
-                $emailSent = $this->phpmailer_library->send(
-                    $nextEmployeeEmail,
-                    $subject,
-                    $body
-                );
+            //     $emailSent = $this->phpmailer_library->send(
+            //         $nextEmployeeEmail,
+            //         $subject,
+            //         $body
+            //     );
 
-                if (!$emailSent) {
+            //     if (!$emailSent) {
 
-                    log_message(
-                        'error',
-                        'Further approval inserted, but email failed for: ' .
-                            $nextEmployeeEmail
-                    );
-                } else {
+            //         log_message(
+            //             'error',
+            //             'Further approval inserted, but email failed for: ' .
+            //                 $nextEmployeeEmail
+            //         );
+            //     } else {
 
-                    log_message(
-                        'error',
-                        'Further approval email sent successfully to: ' .
-                            $nextEmployeeEmail
-                    );
-                }
-            } else {
+            //         log_message(
+            //             'error',
+            //             'Further approval email sent successfully to: ' .
+            //                 $nextEmployeeEmail
+            //         );
+            //     }
+            // } else {
 
-                log_message(
-                    'error',
-                    'Further approval inserted, but selected employee email not found. Employee ID: ' .
-                        $employee_id
-                );
-            }
+            //     log_message(
+            //         'error',
+            //         'Further approval inserted, but selected employee email not found. Employee ID: ' .
+            //             $employee_id
+            //     );
+            // }
 
 
             $this->session->set_flashdata(
                 'success',
                 'Document forwarded for further approval.'
             );
-//  if ($type == 0) {
 
-//     redirect('Approval/approval_in?type=0');
+            if ($from_page === 'order_listing') {
 
-// } elseif ($type == 1) {
+                echo json_encode([
+                    'status' => true,
+                    'type' => $type,
+                    'message' => 'Document forwarded for further approval.',
+                    'data' => [
+                        'doc_id' => $doc_id,
+                        'status' => 3
+                    ]
+                ]);
 
-//     redirect('Approval/approval_in?type=1');
+                return;
+            }
 
-// } elseif ($type == 2) {
-
-//     redirect('Approval/payment_approval_in');
-// }
             redirect('approval/approval_in?type=' . $type);
             return;
         }
@@ -1131,6 +1214,462 @@ class Approval extends CI_Controller
         redirect('approval/approval_in?type=' . $type);
     }
 
+    // ====================================================================================================================================
+
+
+    public function payments()
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | PAGE DATA
+    |--------------------------------------------------------------------------
+    */
+
+        $sdata['approval_window'] = 'active bg-gradient-';
+        $sdata['index'] = '';
+
+        $ndata['bn1']   = $this->lang->line('dashboard');
+        $ndata['bn3']   = 'Payment Approval';
+        $ndata['title'] = 'Payment Approval';
+
+        $rdata['pagetitle'] = 'Payment Approval';
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTERS
+    |--------------------------------------------------------------------------
+    */
+
+        $start_date = $this->input->get('start_date', true);
+        $end_date   = $this->input->get('end_date', true);
+        $search     = trim($this->input->get('search', true));
+        $filter_status = $this->input->get('status', true);
+
+
+        if (empty($start_date)) {
+            $start_date = date('Y-m-01');
+        }
+
+        if (empty($end_date)) {
+            $end_date = date('Y-m-d');
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | PAYMENT LIST
+    |--------------------------------------------------------------------------
+    |
+    | Main table:
+    | tbl_transactions_main
+    |
+    | Sub table:
+    | tbl_transactions_sub
+    |
+    | Branch:
+    | tbl_branch_profile
+    |
+    | ONLY main status = 0
+    |
+    */
+
+        $payments = $this->Approval_model->getJoinedDataPagination(
+
+            'tbl_transactions_main_not_approved tm',
+
+            [
+                'tbl_branch_profile bp'
+                => 'bp.id = tm.branch_id',
+
+                'tbl_transactions_sub_not_approved ts'
+                => 'ts.reference = tm.reference
+                AND ts.status = 0'
+            ],
+
+            '
+        tm.id,
+        tm.date,
+        tm.voucher_no,
+        tm.reference,
+
+        tm.branch_id,
+        bp.name AS branch_name,
+
+        tm.project_id,
+
+        tm.description,
+        tm.amount,
+
+        MAX(
+            CASE
+                WHEN ts.debit > 0
+                THEN ts.acc_name
+                ELSE NULL
+            END
+        ) AS customer_party,
+
+        MAX(
+            CASE
+                WHEN ts.credit > 0
+                THEN ts.acc_name
+                ELSE NULL
+            END
+        ) AS mode_name
+    ',
+
+            [
+                'tm.status' => 0
+            ],
+
+            'array',
+
+            'tm.id',
+
+            [
+                'tm.id' => 'DESC'
+            ]
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | DATE + SEARCH FILTER
+    |--------------------------------------------------------------------------
+    |
+    | Same approach as your Purchase Order controller.
+    |
+    */
+
+        $filteredPayments = [];
+
+
+        if (!empty($payments)) {
+
+            foreach ($payments as $payment) {
+
+                /*
+            |--------------------------------------------------------------------------
+            | DATE FILTER
+            |--------------------------------------------------------------------------
+            */
+
+                if (!empty($payment['date'])) {
+
+                    $paymentDate = date(
+                        'Y-m-d',
+                        strtotime($payment['date'])
+                    );
+
+                    if (
+                        $paymentDate < $start_date ||
+                        $paymentDate > $end_date
+                    ) {
+                        continue;
+                    }
+                } else {
+
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | SEARCH
+            |--------------------------------------------------------------------------
+            |
+            | Search:
+            | Voucher No
+            | Reference
+            | Customer / Party
+            | Description
+            |
+            */
+
+                if (!empty($search)) {
+
+                    $searchValue = strtolower($search);
+
+                    $voucherNo = strtolower(
+                        $payment['voucher_no'] ?? ''
+                    );
+
+                    $reference = strtolower(
+                        $payment['reference'] ?? ''
+                    );
+
+                    $customerParty = strtolower(
+                        $payment['customer_party'] ?? ''
+                    );
+
+                    $description = strtolower(
+                        $payment['description'] ?? ''
+                    );
+
+
+                    if (
+                        strpos($voucherNo, $searchValue) === false
+                        &&
+                        strpos($reference, $searchValue) === false
+                        &&
+                        strpos($customerParty, $searchValue) === false
+                        &&
+                        strpos($description, $searchValue) === false
+                    ) {
+                        continue;
+                    }
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | ADD PAYMENT
+            |--------------------------------------------------------------------------
+            */
+
+                $filteredPayments[] = $payment;
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | FINAL PAYMENT LIST
+    |--------------------------------------------------------------------------
+    */
+
+        $payments = $filteredPayments;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | APPROVAL DATA
+    |--------------------------------------------------------------------------
+    |
+    | This does NOT decide which payments are displayed.
+    |
+    | It is only used if your modal needs approval information.
+    |
+    */
+
+        $approvalData =
+            $this->Approval_model->getJoinedDataPagination(
+
+                'tbl_document_approval da',
+
+                [
+                    'tbl_employee e'
+                    => 'e.profile_id = da.transfer_from',
+
+                    'tbl_designation d'
+                    => 'd.id = e.designation'
+                ],
+
+                '
+                da.id AS approval_id,
+                da.doc_id,
+                da.reference AS approval_reference,
+                da.type,
+                da.transfer_from,
+                da.transfer_to,
+                da.approval_status,
+                da.remark,
+
+                da.transfer_from_datetime,
+                da.transfer_to_datetime,
+                da.action_datetime,
+
+                e.name AS employee_name,
+                d.name AS designation_name
+            ',
+
+                [
+                    'da.type' => 2
+                ],
+
+                'array',
+
+                '',
+
+                [
+                    'da.id' => 'DESC'
+                ]
+            );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | LATEST APPROVAL PER PAYMENT
+    |--------------------------------------------------------------------------
+    */
+
+        $latestApprovals = [];
+
+
+        if (!empty($approvalData)) {
+
+            foreach ($approvalData as $approval) {
+
+                $docId = (int)$approval['doc_id'];
+
+                /*
+            | Since results are DESC by approval ID,
+            | first record is latest.
+            */
+
+                if (!isset($latestApprovals[$docId])) {
+
+                    $latestApprovals[$docId] = $approval;
+                }
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | ADD APPROVAL DATA TO PAYMENT
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($payments as &$payment) {
+
+            $docId = (int)$payment['id'];
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | DEFAULT APPROVAL DATA
+        |--------------------------------------------------------------------------
+        */
+
+            $payment['approval_id'] = 0;
+
+            $payment['doc_id'] = $docId;
+
+            $payment['approval_type'] = 2;
+
+            $payment['transfer_from'] = 0;
+
+            $payment['transfer_to'] = 0;
+
+            $payment['approval_status'] = 0;
+
+            $payment['approval_remark'] = '';
+
+            $payment['transfer_from_datetime'] = null;
+
+            $payment['transfer_to_datetime'] = null;
+
+            $payment['action_datetime'] = null;
+
+            $payment['employee_name'] = '';
+
+            $payment['designation_name'] = '';
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | EXISTING APPROVAL
+        |--------------------------------------------------------------------------
+        */
+
+            if (isset($latestApprovals[$docId])) {
+
+                $approval = $latestApprovals[$docId];
+
+
+                $payment['approval_id'] =
+                    (int)($approval['approval_id'] ?? 0);
+
+                $payment['doc_id'] =
+                    (int)($approval['doc_id'] ?? $docId);
+
+                $payment['approval_type'] =
+                    (int)($approval['type'] ?? 2);
+
+                $payment['transfer_from'] =
+                    (int)($approval['transfer_from'] ?? 0);
+
+                $payment['transfer_to'] =
+                    (int)($approval['transfer_to'] ?? 0);
+
+                $payment['approval_status'] =
+                    (int)($approval['approval_status'] ?? 0);
+
+                $payment['approval_remark'] =
+                    $approval['remark'] ?? '';
+
+                $payment['transfer_from_datetime'] =
+                    $approval['transfer_from_datetime'] ?? null;
+
+                $payment['transfer_to_datetime'] =
+                    $approval['transfer_to_datetime'] ?? null;
+
+                $payment['action_datetime'] =
+                    $approval['action_datetime'] ?? null;
+
+                $payment['employee_name'] =
+                    $approval['employee_name'] ?? '';
+
+                $payment['designation_name'] =
+                    $approval['designation_name'] ?? '';
+            }
+        }
+
+        unset($payment);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | DESIGNATIONS
+    |--------------------------------------------------------------------------
+    */
+
+        $rdata['designation'] =
+            $this->Approval_model->get_specific_columns(
+                'tbl_designation',
+                [
+                    'id',
+                    'name'
+                ],
+                [
+                    'status' => 0
+                ]
+            );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | SEND DATA TO VIEW
+    |--------------------------------------------------------------------------
+    */
+
+        $rdata['payments'] = $payments;
+
+        $rdata['start_date'] = $start_date;
+
+        $rdata['end_date'] = $end_date;
+
+        $rdata['search'] = $search;
+
+        $rdata['filter_status'] = $filter_status;
+
+        $rdata['type'] = 2;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | LOAD VIEW
+    |--------------------------------------------------------------------------
+    */
+
+        $this->view_function1(
+            'Approval/payments',
+            $rdata,
+            $sdata,
+            $ndata
+        );
+    }
     public function payment_approval_in()
     {
         $sdata['approval_window'] = 'active bg-gradient-';
@@ -1173,23 +1712,23 @@ class Approval extends CI_Controller
          * IMPORTANT:
          * da.doc_id = tna.reference
          */
-           $approvalData = $this->Approval_model->getJoinedDataPagination(
-    'tbl_document_approval da',
-    [
-        'tbl_transactions_main_not_approved tna'
-            => 'tna.id = da.doc_id
+            $approvalData = $this->Approval_model->getJoinedDataPagination(
+                'tbl_document_approval da',
+                [
+                    'tbl_transactions_main_not_approved tna'
+                    => 'tna.id = da.doc_id
               AND tna.reference = da.reference',
 
-        'tbl_profile p'
-            => 'p.id = tna.profile_id',
+                    'tbl_profile p'
+                    => 'p.id = tna.profile_id',
 
-        'tbl_employee e'
-            => 'e.id = da.transfer_from',
+                    'tbl_employee e'
+                    => 'e.id = da.transfer_from',
 
-        'tbl_designation d'
-            => 'd.id = e.designation'
-    ],
-    '
+                    'tbl_designation d'
+                    => 'd.id = e.designation'
+                ],
+                '
         tna.id,
         tna.reference,
         tna.reference2,
@@ -1225,55 +1764,55 @@ class Approval extends CI_Controller
 
         d.name AS designation_name
     ',
-    [
-        'da.type'    => 2,
-        'tna.status' => 0
-    ],
-    'array',
-    '',
-    [
-        'da.id' => 'DESC'
-    ]
-);
-
- 
+                [
+                    'da.type'    => 2,
+                    'tna.status' => 0
+                ],
+                'array',
+                '',
+                [
+                    'da.id' => 'DESC'
+                ]
+            );
 
 
 
-           $latestApprovals = [];
 
-if (!empty($approvalData)) {
 
-    foreach ($approvalData as $row) {
+            $latestApprovals = [];
 
-        $doc_id = (int)$row['doc_id'];
+            if (!empty($approvalData)) {
 
-        // Only current employee
-        if ((int)$row['transfer_to'] !== (int)$profile_id) {
-            continue;
-        }
+                foreach ($approvalData as $row) {
 
-        // Only pending approval
-        if ((int)$row['approval_status'] !== 0) {
-            continue;
-        }
+                    $doc_id = (int)$row['doc_id'];
 
-        // Keep the latest pending approval for this document
-        if (
-            !isset($latestApprovals[$doc_id]) ||
-            (int)$row['approval_id'] >
-            (int)$latestApprovals[$doc_id]['approval_id']
-        ) {
+                    // Only current employee
+                    if ((int)$row['transfer_to'] !== (int)$profile_id) {
+                        continue;
+                    }
 
-            $latestApprovals[$doc_id] = $row;
-        }
-    }
-}
+                    // Only pending approval
+                    if ((int)$row['approval_status'] !== 0) {
+                        continue;
+                    }
+
+                    // Keep the latest pending approval for this document
+                    if (
+                        !isset($latestApprovals[$doc_id]) ||
+                        (int)$row['approval_id'] >
+                        (int)$latestApprovals[$doc_id]['approval_id']
+                    ) {
+
+                        $latestApprovals[$doc_id] = $row;
+                    }
+                }
+            }
         }
         $rdata['payments'] = array_values($latestApprovals);
         $rdata['type'] = $type;
 
-       
+
         $this->view_function1(
             'Approval/payment_approval_in',
             $rdata,
@@ -1282,18 +1821,18 @@ if (!empty($approvalData)) {
         );
     }
 
-public function payment_approval_out()
-{
-    $sdata['approval_window'] = 'active bg-gradient-';
-    $sdata['index'] = '';
+    public function payment_approval_out()
+    {
+        $sdata['approval_window'] = 'active bg-gradient-';
+        $sdata['index'] = '';
 
-    $ndata['bn1']   = $this->lang->line('dashboard');
-    $ndata['bn3']   = 'Payment Approval Out';
-    $ndata['title'] = 'Payment Approval Out';
+        $ndata['bn1']   = $this->lang->line('dashboard');
+        $ndata['bn3']   = 'Payment Approval Out';
+        $ndata['title'] = 'Payment Approval Out';
 
-    $rdata['pagetitle'] = 'Payment Approval Out';
+        $rdata['pagetitle'] = 'Payment Approval Out';
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | PAYMENT TYPE
     |--------------------------------------------------------------------------
@@ -1301,82 +1840,82 @@ public function payment_approval_out()
     |--------------------------------------------------------------------------
     */
 
-    $type = 2;
+        $type = 2;
 
-    // Logged-in profile
-    // $profile_id = $this->session->userdata('profile_id');
-    $profile_id = 1;
+        // Logged-in profile
+        // $profile_id = $this->session->userdata('profile_id');
+        $profile_id = 1;
 
-    $rdata['payments'] = [];
-    $rdata['type'] = $type;
-    $rdata['payment_direction'] = 'out';
+        $rdata['payments'] = [];
+        $rdata['type'] = $type;
+        $rdata['payment_direction'] = 'out';
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | DESIGNATIONS
     |--------------------------------------------------------------------------
     */
 
-    $rdata['designation'] = $this->Approval_model->get_specific_columns(
-        'tbl_designation',
-        ['id', 'name'],
-        [
-            'status' => 0
-        ]
-    );
+        $rdata['designation'] = $this->Approval_model->get_specific_columns(
+            'tbl_designation',
+            ['id', 'name'],
+            [
+                'status' => 0
+            ]
+        );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | GET PAYMENT OUT APPROVALS
     |--------------------------------------------------------------------------
     */
 
-    if (!empty($profile_id)) {
+        if (!empty($profile_id)) {
 
-        $rdata['payments'] = $this->Approval_model->getJoinedDataPagination(
-            'tbl_document_approval da',
+            $rdata['payments'] = $this->Approval_model->getJoinedDataPagination(
+                'tbl_document_approval da',
 
-            [
-                /*
+                [
+                    /*
                 | Payment transaction
                 */
-                'tbl_transactions_main_not_approved tna'
+                    'tbl_transactions_main_not_approved tna'
                     => 'tna.id = da.doc_id',
 
-                /*
+                    /*
                 | Payment creator/profile
                 */
-                'tbl_profile p'
+                    'tbl_profile p'
                     => 'p.id = tna.profile_id',
 
-                /*
+                    /*
                 | Employee who sent the approval
                 */
-                'tbl_employee e'
+                    'tbl_employee e'
                     => 'e.id = da.transfer_from',
 
-                /*
+                    /*
                 | Sender designation
                 */
-                'tbl_designation d'
+                    'tbl_designation d'
                     => 'd.id = e.designation',
 
-                /*
+                    /*
                 | Employee who receives approval
                 */
-                'tbl_employee et'
+                    'tbl_employee et'
                     => 'et.id = da.transfer_to',
 
-                /*
+                    /*
                 | Receiver designation
                 */
-                'tbl_designation dt'
+                    'tbl_designation dt'
                     => 'dt.id = et.designation'
-            ],
+                ],
 
-            '
+                '
                 tna.id,
                 tna.reference,
                 tna.reference2,
@@ -1415,399 +1954,399 @@ public function payment_approval_out()
                 dt.name AS transfer_to_designation
             ',
 
-            [
-                /*
+                [
+                    /*
                 | Payment approval
                 */
-                'da.type' => $type,
+                    'da.type' => $type,
 
-                /*
+                    /*
                 | IMPORTANT:
                 | Payment OUT = current profile is transfer_from
                 */
-                'da.transfer_from' => $profile_id,
+                    'da.transfer_from' => $profile_id,
 
-                /*
+                    /*
                 | Temporary payment transaction
                 */
-                'tna.type' => $type,
+                    'tna.type' => $type,
 
-                /*
+                    /*
                 | Still not approved / temporary transaction
                 */
-                'tna.status' => 0
-            ],
+                    'tna.status' => 0
+                ],
 
-            'array',
-            '',
+                'array',
+                '',
 
-            [
-                'da.id' => 'DESC'
-            ]
-        );
-    }
+                [
+                    'da.id' => 'DESC'
+                ]
+            );
+        }
 
 
- 
-    /*
+
+        /*
     |--------------------------------------------------------------------------
     | LOAD VIEW
     |--------------------------------------------------------------------------
     */
 
-    $this->view_function1(
-        'Approval/payment_approval_out',
-        $rdata,
-        $sdata,
-        $ndata
-    );
-}
+        $this->view_function1(
+            'Approval/payment_approval_out',
+            $rdata,
+            $sdata,
+            $ndata
+        );
+    }
 
- public function payment_saveapproval()
-{
-    $approval_id = (int)$this->input->post('approval_id');
-    $doc_id      = (int)$this->input->post('doc_id');
-    $type        = (int)$this->input->post('type');
+    public function payment_saveapproval()
+    {
+        $approval_id = (int)$this->input->post('approval_id');
+        $doc_id      = (int)$this->input->post('doc_id');
+        $type        = (int)$this->input->post('type');
 
-    $remarks     = $this->input->post('remarks');
-    $approval_date = $this->input->post('approval_date');
+        $remarks     = $this->input->post('remarks');
+        $approval_date = $this->input->post('approval_date');
 
-    // Logged-in profile
-    // $profile_id = $this->session->userdata('profile_id');
-    $profile_id = 1;
+        // Logged-in profile
+        // $profile_id = $this->session->userdata('profile_id');
+        $profile_id = 1;
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | ONLY PAYMENT
     |--------------------------------------------------------------------------
     */
 
-    if ($type !== 2) {
+        if ($type !== 2) {
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Invalid payment approval type.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Invalid payment approval type.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | VALIDATION
     |--------------------------------------------------------------------------
     */
 
-    if (empty($approval_id)) {
+        if (empty($approval_id)) {
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Approval ID is missing.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Approval ID is missing.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
-    if (empty($doc_id)) {
+        if (empty($doc_id)) {
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Payment document ID is missing.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Payment document ID is missing.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | START DATABASE TRANSACTION
     |--------------------------------------------------------------------------
     */
 
-    $this->db->trans_begin();
+        $this->db->trans_begin();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 1. GET PENDING PAYMENT
     |--------------------------------------------------------------------------
     */
 
-    $payment = $this->db
-        ->where('id', $doc_id)
-        ->where('type', 2)
-        ->where('status', 0)
-        ->get('tbl_transactions_main_not_approved')
-        ->row_array();
+        $payment = $this->db
+            ->where('id', $doc_id)
+            ->where('type', 2)
+            ->where('status', 0)
+            ->get('tbl_transactions_main_not_approved')
+            ->row_array();
 
 
-    if (empty($payment)) {
+        if (empty($payment)) {
 
-        $this->db->trans_rollback();
+            $this->db->trans_rollback();
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Pending payment not found.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Pending payment not found.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 2. GET PAYMENT SUB TRANSACTIONS
     |--------------------------------------------------------------------------
     */
 
-    $subTransactions = $this->db
-        ->where('reference', $payment['reference'])
-        ->where('status', 0)
-        ->get('tbl_transactions_sub_not_approved')
-        ->result_array();
+        $subTransactions = $this->db
+            ->where('reference', $payment['reference'])
+            ->where('status', 0)
+            ->get('tbl_transactions_sub_not_approved')
+            ->result_array();
 
 
-    if (empty($subTransactions)) {
+        if (empty($subTransactions)) {
 
-        $this->db->trans_rollback();
+            $this->db->trans_rollback();
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Payment sub transactions not found.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Payment sub transactions not found.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 3. CHECK APPROVAL RECORD
     |--------------------------------------------------------------------------
     */
 
-    $approval = $this->db
-        ->where('id', $approval_id)
-        ->where('doc_id', $doc_id)
-        ->where('type', 2)
-        ->where('approval_status', 0)
-        ->get('tbl_document_approval')
-        ->row_array();
+        $approval = $this->db
+            ->where('id', $approval_id)
+            ->where('doc_id', $doc_id)
+            ->where('type', 2)
+            ->where('approval_status', 0)
+            ->get('tbl_document_approval')
+            ->row_array();
 
 
-    if (empty($approval)) {
+        if (empty($approval)) {
 
-        $this->db->trans_rollback();
+            $this->db->trans_rollback();
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Pending payment approval record not found.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Pending payment approval record not found.'
+            ]);
 
-        return;
-    }
+            return;
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 4. INSERT INTO tbl_transactions_main
     |--------------------------------------------------------------------------
     */
 
-    $mainData = $payment;
+        $mainData = $payment;
 
-    // Remove primary key from temporary table
-    unset($mainData['id']);
+        // Remove primary key from temporary table
+        unset($mainData['id']);
 
-    $this->db->insert(
-        'tbl_transactions_main',
-        $mainData
-    );
-
-
-    if ($this->db->affected_rows() <= 0) {
-
-        $this->db->trans_rollback();
-
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Failed to insert payment into transactions main.'
-        ]);
-
-        return;
-    }
+        $this->db->insert(
+            'tbl_transactions_main',
+            $mainData
+        );
 
 
-   /*
+        if ($this->db->affected_rows() <= 0) {
+
+            $this->db->trans_rollback();
+
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Failed to insert payment into transactions main.'
+            ]);
+
+            return;
+        }
+
+
+        /*
 |--------------------------------------------------------------------------
 | 5. INSERT INTO tbl_transactions_sub
 |--------------------------------------------------------------------------
 */
 
-foreach ($subTransactions as $sub) {
+        foreach ($subTransactions as $sub) {
 
-    $subData = [
-        'reference'   => $sub['reference'],
-        'cc_id'       => isset($sub['cc_id']) ? $sub['cc_id'] : 0,
-        'acc_id'      => $sub['acc_id'],
-        'acc_name'    => $sub['acc_name'],
-        'description' => isset($sub['description']) ? $sub['description'] : '',
-        'debit'       => isset($sub['debit']) ? $sub['debit'] : 0,
-        'credit'      => isset($sub['credit']) ? $sub['credit'] : 0,
-        'status'      => 0
-    ];
+            $subData = [
+                'reference'   => $sub['reference'],
+                'cc_id'       => isset($sub['cc_id']) ? $sub['cc_id'] : 0,
+                'acc_id'      => $sub['acc_id'],
+                'acc_name'    => $sub['acc_name'],
+                'description' => isset($sub['description']) ? $sub['description'] : '',
+                'debit'       => isset($sub['debit']) ? $sub['debit'] : 0,
+                'credit'      => isset($sub['credit']) ? $sub['credit'] : 0,
+                'status'      => 0
+            ];
 
-    $this->db->insert(
-        'tbl_transactions_sub',
-        $subData
-    );
+            $this->db->insert(
+                'tbl_transactions_sub',
+                $subData
+            );
 
-    if ($this->db->affected_rows() <= 0) {
+            if ($this->db->affected_rows() <= 0) {
 
-        $this->db->trans_rollback();
+                $this->db->trans_rollback();
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Failed to insert payment sub transaction.',
-            'error'   => $this->db->error()
-        ]);
+                echo json_encode([
+                    'status'  => false,
+                    'message' => 'Failed to insert payment sub transaction.',
+                    'error'   => $this->db->error()
+                ]);
 
-        return;
-    }
-}
+                return;
+            }
+        }
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 6. UPDATE MAIN NOT APPROVED
     |--------------------------------------------------------------------------
     */
 
-    $this->db
-        ->where('id', $doc_id)
-        ->update(
-            'tbl_transactions_main_not_approved',
-            [
-                'status' => 1
-            ]
-        );
+        $this->db
+            ->where('id', $doc_id)
+            ->update(
+                'tbl_transactions_main_not_approved',
+                [
+                    'status' => 1
+                ]
+            );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 7. UPDATE SUB NOT APPROVED
     |--------------------------------------------------------------------------
     */
 
-    $this->db
-        ->where('reference', $payment['reference'])
-        ->update(
-            'tbl_transactions_sub_not_approved',
-            [
-                'status' => 1
-            ]
-        );
+        $this->db
+            ->where('reference', $payment['reference'])
+            ->update(
+                'tbl_transactions_sub_not_approved',
+                [
+                    'status' => 1
+                ]
+            );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | 8. INSERT PAYMENT APPROVAL
     |--------------------------------------------------------------------------
     */
 
-    $approvalData = [
+        $approvalData = [
 
-        'doc_id' => $doc_id,
+            'doc_id' => $doc_id,
 
-        // Your new reference column
-        'reference' => $payment['reference'],
+            // Your new reference column
+            'reference' => $payment['reference'],
 
-        // Payment
-        'type' => 2,
+            // Payment
+            'type' => 2,
 
-        'transfer_from' => $approval['transfer_to'],
+            'transfer_from' => $approval['transfer_to'],
 
-        'transfer_to' => $approval['transfer_from'],
+            'transfer_to' => $approval['transfer_from'],
 
-        // Approved
-        'approval_status' => 1,
+            // Approved
+            'approval_status' => 1,
 
-        'remark' => !empty($remarks)
-            ? $remarks
-            : 'Payment Approved',
+            'remark' => !empty($remarks)
+                ? $remarks
+                : 'Payment Approved',
 
-        'transfer_from_datetime' => !empty($approval_date)
-            ? $approval_date
-            : date('Y-m-d'),
+            'transfer_from_datetime' => !empty($approval_date)
+                ? $approval_date
+                : date('Y-m-d'),
 
-        'transfer_to_datetime' => date('Y-m-d'),
+            'transfer_to_datetime' => date('Y-m-d'),
 
-        'action_datetime' => date('Y-m-d'),
+            'action_datetime' => date('Y-m-d'),
 
-        'status' => 0,
+            'status' => 0,
 
-        'added_by' => $profile_id,
+            'added_by' => $profile_id,
 
-        'ip_address' => $this->input->ip_address(),
+            'ip_address' => $this->input->ip_address(),
 
-        'created_at' => date('Y-m-d H:i:s')
-    ];
-
-
-    $this->db->insert(
-        'tbl_document_approval',
-        $approvalData
-    );
+            'created_at' => date('Y-m-d H:i:s')
+        ];
 
 
-    if ($this->db->affected_rows() <= 0) {
-
-        $this->db->trans_rollback();
-
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Failed to insert payment approval.'
-        ]);
-
-        return;
-    }
+        $this->db->insert(
+            'tbl_document_approval',
+            $approvalData
+        );
 
 
-    /*
+        if ($this->db->affected_rows() <= 0) {
+
+            $this->db->trans_rollback();
+
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Failed to insert payment approval.'
+            ]);
+
+            return;
+        }
+
+
+        /*
     |--------------------------------------------------------------------------
     | 9. COMMIT
     |--------------------------------------------------------------------------
     */
 
-    if ($this->db->trans_status() === false) {
+        if ($this->db->trans_status() === false) {
 
-        $this->db->trans_rollback();
+            $this->db->trans_rollback();
 
-        echo json_encode([
-            'status'  => false,
-            'message' => 'Payment approval failed.'
-        ]);
+            echo json_encode([
+                'status'  => false,
+                'message' => 'Payment approval failed.'
+            ]);
 
-        return;
-    }
-
-
-    $this->db->trans_commit();
+            return;
+        }
 
 
-    /*
+        $this->db->trans_commit();
+
+
+        /*
     |--------------------------------------------------------------------------
     | SUCCESS
     |--------------------------------------------------------------------------
     */
 
-    echo json_encode([
-        'status'  => true,
-        'message' => 'Payment approved successfully.',
-        'doc_id'  => $doc_id,
-        'reference' => $payment['reference']
-    ]);
-}
+        echo json_encode([
+            'status'  => true,
+            'message' => 'Payment approved successfully.',
+            'doc_id'  => $doc_id,
+            'reference' => $payment['reference']
+        ]);
+    }
 }

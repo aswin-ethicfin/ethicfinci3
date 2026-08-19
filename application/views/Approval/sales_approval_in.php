@@ -14,6 +14,7 @@
                         <h6 class="text-white text-capitalize ps-3 mb-0">
                             Sales Approval In
                         </h6>
+                        
 
                     </div>
 
@@ -280,6 +281,20 @@
 
                     </a>
 
+                   <a href="<?= base_url('vieworder?order=' . $row['id']) ?>"
+   class="btn btn-sm btn-primary">
+
+    <i class="fa fa-eye"></i>
+
+</a>
+
+                                              <a href="<?= base_url('editorder?ref=' . $row['id']) ?>"
+   class="btn btn-sm btn-secondary">
+
+    <i class="fa fa-edit"></i>
+
+</a>
+                                            </td>
                 </div>
 
             </td>
